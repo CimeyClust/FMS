@@ -10,6 +10,17 @@ class Controller:
         # Model
         self.model = Model()
 
+        self.getTitles()
+
+    def getTitles(self):
+        examples = {
+            1: {
+                "title": "10 Wege um so schlau zu werden, wie Leon."
+            }
+        }
+        for exampleKey in examples.keys():
+            print(examples[exampleKey]["title"])
+
         # CallbackHandler
         # Load the main view, which enable the window
         # A new view will be instantiated every time it switches
