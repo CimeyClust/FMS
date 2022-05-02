@@ -6,7 +6,7 @@ import pandas as pd
 class Model:
     def __init__(self):
 
-        # define connection and cursor
+        # Define connection and cursor
         connection = sqlite3.connect('fms.db')
         cursor = connection.cursor()
         
@@ -50,16 +50,15 @@ class Model:
         # Close the connection
         cursor.close()
         connection.close()
-        
 
-    # prited alles aus den tabellen
-    def table_info(self):
+    # Returns information about all tables in the database
+    def tableInfo(self):
         conn = sqlite3.connect('fms.db')
         c = conn.cursor()
         
         tables = c.execute("SELECT name FROM sqlite_master WHERE type='table';").fetchall()
         for table_name in tables:
-            table_name = table_name[0] # tables is a list of single item tuples
+            table_name = table_name[0]  # tables is a list of single item tuples
             table = pd.read_sql_query("SELECT * from {} LIMIT 0".format(table_name), conn)
             print(table_name)
             for col in table.columns:
@@ -69,8 +68,8 @@ class Model:
         c.close()
         conn.close()
 
-
-    def testsaetze(self):
+    # Quick insert methode for testing wil get improved later on
+    def insert(self):
         connection = sqlite3.connect('fms.db')
         cursor = connection.cursor()
         
@@ -86,8 +85,8 @@ class Model:
         cursor.close()
         connection.close()
 
-
-    def get_benutzer(self):
+    # Quick getter methode for the User table, will get improved later
+    def getUser(self):
         connection = sqlite3.connect('fms.db')
         cursor = connection.cursor()
 
@@ -101,6 +100,9 @@ class Model:
 
 if __name__ == "__main__":
     
-    Model().table_info()
-    Model().testsaetze()
-    Model().get_benutzer()
+    Model().tableInfo()
+    Model().insert()
+    Model().getUser()
+
+# ignore this for the moment
+os.getenv('LOCALAPPDATA')

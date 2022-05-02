@@ -1,4 +1,4 @@
-    def to_csv(self):
+    def toCSV(self):
         connection = sqlite3.connect('fms.db')
         cursor = connection.cursor()
 
@@ -13,5 +13,3 @@
 
         cursor.close()
         connection.close()
-
-    print("\n" + os.getenv('LOCALAPPDATA'))
