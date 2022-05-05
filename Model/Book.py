@@ -1,3 +1,7 @@
+books = []
+
 class Book:
     def __init__(self, id: int):
-        pass
+        self.id = id
+
+        books.append(self)
