@@ -13,41 +13,46 @@ class Model(object):
         with self:
             # Creating SQL commands for the table generation
             table_benutzer = """ CREATE TABLE IF NOT EXISTS BENUTZER (
-                                 BenutzerID INTEGER PRIMARY KEY AUTOINCREMENT,
+                                 BenutzerID INTEGER NOT NULL,
                                  Vorname VARCHAR(255) NOT NULL,
                                  Nachname VARCHAR(255) NOT NULL,
-                                 Klasse INTEGER(4) NULL DEFAULT NULL
+                                 Klasse INTEGER(4) NULL DEFAULT NULL,
+                                 PRIMARY KEY(BenutzerID AUTOINCREMENT)
                              ); """
 
             table_entleiht = """ CREATE TABLE IF NOT EXISTS ENTLEIHT (
-                                 VorgangsID INTEGER PRIMARY KEY AUTOINCREMENT,
+                                 VorgangsID INTEGER NOT NULL,
                                  BenutzerID INTEGER UNSIGNED NOT NULL,
                                  ExemplarID INTEGER UNSIGNED NOT NULL,
                                  DatumEntleihe TIMESTAMP NOT NULL,
                                  DatumRückgabe TIMESTAMP NOT NULL,
+                                 PRIMARY KEY(VorgangsID AUTOINCREMENT),
                                  FOREIGN KEY (BenutzerID) REFERENCES `BENUTZER`(`BenutzerID`) ON DELETE CASCADE,
                                  FOREIGN KEY (ExemplarID) REFERENCES `EXEMPLAR`(`ExemplarID`) ON DELETE CASCADE
                              ); """
 
             table_exemplar = """ CREATE TABLE IF NOT EXISTS EXEMPLAR (
-                                 ExemplarID INTEGER PRIMARY KEY AUTOINCREMENT,
+                                 ExemplarID INTEGER NOT NULL,
                                  TitelID INTEGER UNSIGNED NOT NULL,
                                  Bemerkung VARCHAR(255) NOT NULL,
+                                 PRIMARY KEY(ExemplarID AUTOINCREMENT),
                                  FOREIGN KEY (TitelID) REFERENCES `TITEL`(`TitelID`) ON DELETE CASCADE
                              ); """
 
             table_titel = """ CREATE TABLE IF NOT EXISTS TITEL (
-                              TitelID INTEGER PRIMARY KEY AUTOINCREMENT,
+                              TitelID INTEGER NOT NULL,
                               FachbereichsID INTEGER UNSIGNED NOT NULL,
                               Titel VARCHAR(255) NOT NULL,
                               ISBN INTEGER(13) NULL DEFAULT NULL,
                               Autor VARCHAR(255) NOT NULL,
+                              PRIMARY KEY(TitelID AUTOINCREMENT),
                               FOREIGN KEY (FachbereichsID) REFERENCES `FACHBEREICH`(`FachbereichsID`) ON DELETE CASCADE
                           ); """
 
             table_fachbereich = """ CREATE TABLE IF NOT EXISTS FACHBEREICH (
-                                    FachbereichsID INTEGER PRIMARY KEY AUTOINCREMENT,
-                                    Fachbereichsname VARCHAR(255) NOT NULL
+                                    FachbereichsID INTEGER NOT NULL,
+                                    Fachbereichsname VARCHAR(255) NOT NULL,
+                                    PRIMARY KEY(FachbereichsID AUTOINCREMENT)
                                 ); """
 
             # Execution of the SQL commands
