@@ -11,6 +11,9 @@ class Model(object):
 
         # Local AppData Directory --> self.connection = sqlite3.connect(f'{os.getenv("LOCALAPPDATA")}\\fms.db')
 
+    '''
+    Create the required tables for the program to work
+    '''
     def createTable(self):
         with self:
             # Creating SQL queries for the table generation
