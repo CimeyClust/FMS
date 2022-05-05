@@ -6,6 +6,9 @@ from View.Views import View, MainView
 
 
 class Controller:
+    """
+    Init the controller
+    """
     def __init__(self):
         mainView = MainView()
 
@@ -19,28 +22,28 @@ class Controller:
         # Set Main windows on startup
         self.viewHandler = ViewHandler(ViewRegister.MAIN_VIEW.value)
 
-    '''
+    """
     Loads every subject into it's own initiation of the Subject-Class
-    '''
+    """
     def loadSubjects(self):
         pass
 
-    '''
+    """
     Loads every title into it's own initiation of the Title-Class
-    '''
+    """
     def loadTitles(self):
         pass
 
-    '''
+    """
     Loads every book into it's own initiation of the Title-Class
-    '''
+    """
     def loadBooks(self):
         pass
 
-    '''
+    """
     Return all books if onlyBorrowed = false
     If onlyBorrowed = true, only already borrowed books will be returned
-    '''
+    """
     def getAllBooks(self, onlyBorrowed: bool):
         exampleBooks: list[Book] = []
 
