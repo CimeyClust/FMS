@@ -1,5 +1,6 @@
 from Controller.ViewHandler import ViewHandler
 from Controller.ViewRegister import ViewRegister
+from Model.Book import Book
 from Model.Model import Model
 from View.Views import View, MainView
 
@@ -30,7 +31,17 @@ class Controller:
     def loadTitles(self):
         pass
 
-    def getTitles(self):
-        examples = []
+    ''''
+    Loads every book into it's own initiation of the Title-Class
+    '''
+    def loadBooks(self):
+        pass
 
-        return  examples
+    '''
+    Return all books if onlyBorrowed = false
+    If onlyBorrowed = true, only already borrowed books will be returned
+    '''
+    def getAllBooks(self, onlyBorrowed: bool):
+        exampleBooks: list[Book] = []
+
+        return exampleBooks
