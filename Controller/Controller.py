@@ -31,7 +31,7 @@ class Controller:
     def loadTitles(self):
         pass
 
-    ''''
+    '''
     Loads every book into it's own initiation of the Title-Class
     '''
     def loadBooks(self):
