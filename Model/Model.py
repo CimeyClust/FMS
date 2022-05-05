@@ -1,4 +1,4 @@
-import os
+# import os
 import sqlite3
 import pandas as pd
 
@@ -9,53 +9,50 @@ class Model(object):
         self.connection = sqlite3.connect('fms.db')
         self.cursor = self.connection.cursor()
 
+        # Local AppData Directory --> self.connection = sqlite3.connect(f'{os.getenv("LOCALAPPDATA")}\\fms.db')
+
     def createTable(self):
         with self:
-            # Creating SQL commands for the table generation
+            # Creating SQL queries for the table generation
             table_benutzer = """ CREATE TABLE IF NOT EXISTS BENUTZER (
-                                 BenutzerID INTEGER NOT NULL,
+                                 BenutzerID INTEGER PRIMARY KEY,
                                  Vorname VARCHAR(255) NOT NULL,
                                  Nachname VARCHAR(255) NOT NULL,
-                                 Klasse INTEGER(4) NULL DEFAULT NULL,
-                                 PRIMARY KEY(BenutzerID AUTOINCREMENT)
+                                 Klasse INTEGER(4) NULL DEFAULT NULL
                              ); """
 
             table_entleiht = """ CREATE TABLE IF NOT EXISTS ENTLEIHT (
-                                 VorgangsID INTEGER NOT NULL,
+                                 VorgangsID INTEGER PRIMARY KEY,
                                  BenutzerID INTEGER UNSIGNED NOT NULL,
                                  ExemplarID INTEGER UNSIGNED NOT NULL,
                                  DatumEntleihe TIMESTAMP NOT NULL,
                                  DatumRückgabe TIMESTAMP NOT NULL,
-                                 PRIMARY KEY(VorgangsID AUTOINCREMENT),
                                  FOREIGN KEY (BenutzerID) REFERENCES `BENUTZER`(`BenutzerID`) ON DELETE CASCADE,
                                  FOREIGN KEY (ExemplarID) REFERENCES `EXEMPLAR`(`ExemplarID`) ON DELETE CASCADE
                              ); """
 
             table_exemplar = """ CREATE TABLE IF NOT EXISTS EXEMPLAR (
-                                 ExemplarID INTEGER NOT NULL,
+                                 ExemplarID INTEGER PRIMARY KEY,
                                  TitelID INTEGER UNSIGNED NOT NULL,
                                  Bemerkung VARCHAR(255) NOT NULL,
-                                 PRIMARY KEY(ExemplarID AUTOINCREMENT),
                                  FOREIGN KEY (TitelID) REFERENCES `TITEL`(`TitelID`) ON DELETE CASCADE
                              ); """
 
             table_titel = """ CREATE TABLE IF NOT EXISTS TITEL (
-                              TitelID INTEGER NOT NULL,
+                              TitelID INTEGER PRIMARY KEY,
                               FachbereichsID INTEGER UNSIGNED NOT NULL,
                               Titel VARCHAR(255) NOT NULL,
                               ISBN INTEGER(13) NULL DEFAULT NULL,
                               Autor VARCHAR(255) NOT NULL,
-                              PRIMARY KEY(TitelID AUTOINCREMENT),
                               FOREIGN KEY (FachbereichsID) REFERENCES `FACHBEREICH`(`FachbereichsID`) ON DELETE CASCADE
                           ); """
 
             table_fachbereich = """ CREATE TABLE IF NOT EXISTS FACHBEREICH (
-                                    FachbereichsID INTEGER NOT NULL,
-                                    Fachbereichsname VARCHAR(255) NOT NULL,
-                                    PRIMARY KEY(FachbereichsID AUTOINCREMENT)
+                                    FachbereichsID INTEGER PRIMARY KEY,
+                                    Fachbereichsname VARCHAR(255) NOT NULL
                                 ); """
 
-            # Execution of the SQL commands
+            # Execution of the SQL queries
             self.cursor.execute(table_benutzer)
             self.cursor.execute(table_entleiht)
             self.cursor.execute(table_exemplar)
@@ -63,7 +60,7 @@ class Model(object):
             self.cursor.execute(table_fachbereich)
 
     # Deletes all tables
-    def dumpTables(self):
+    def dumpTable(self):
         with self:
             self.cursor.execute("DROP TABLE IF EXISTS BENUTZER")
             self.cursor.execute("DROP TABLE IF EXISTS ENTLEIHT")
@@ -74,29 +71,30 @@ class Model(object):
     # Returns information about all tables in the database
     def tableInfo(self):
         with self:
-            tables = self.cursor.execute("SELECT name FROM sqlite_master WHERE type='table';").fetchall()
+            self.cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+            tables = self.cursor.fetchall()
             for table_name in tables:
-                table_name = table_name[0]  # tables is a list of single item tuples
-                table = pd.read_sql_query("SELECT * from {} LIMIT 0".format(table_name), self.connection)
+                table_name = table_name[0]
+                table = pd.read_sql_query(f"SELECT * from {table_name}", self.connection)
                 print(table_name)
-                for col in table.columns:
-                    print('\t' + col)
-                print()
+                print(table)
+                print("")
 
-    # Quick insert methode for testing wil get improved later on
-    def insert(self):
+    # Generell execute method for custom sql query
+    def execute(self, query):
         with self:
-            yadel = "INSERT INTO BENUTZER (Vorname, Nachname, Klasse) VALUES ('Yassin','Starzetz', 1011);"
-            mrnoodle = "INSERT INTO BENUTZER (Vorname, Nachname, Klasse) VALUES ('Vincent','Starzetz', 1011);"
+            self.cursor.execute(query)
 
-            self.cursor.execute(yadel)
-            self.cursor.execute(mrnoodle)
-
-    # Quick getter methode for the User table, will get improved later
-    def getUser(self):
+    # Insert methode for user
+    def insertUser(self, name: str, surname: str, school_class: int):
         with self:
-            self.cursor.execute("SELECT * FROM BENUTZER;")
-            print(self.cursor.fetchall())
+            self.cursor.execute(f"INSERT INTO BENUTZER (Vorname, Nachname, Klasse) VALUES ('{name}','{surname}', {school_class});")
+
+    # Get Method for Tables
+    def getTable(self, table_name: str):
+        with self:
+            self.cursor.execute(f"SELECT * FROM {table_name};")
+            return self.cursor.fetchall()
 
     # Context Manager
     def __enter__(self):
@@ -114,11 +112,7 @@ class Model(object):
 if __name__ == "__main__":
 
     Model().createTable()
+    Model().insertUser("Yassin", "Starzetz", 1011)
     Model().tableInfo()
-    Model().insert()
-    Model().getUser()
-
-# ignore this for the moment
-os.getenv('LOCALAPPDATA')
-
-# Update
+    print(Model().getTable("BENUTZER"))
+    # Model().dumpTable()
