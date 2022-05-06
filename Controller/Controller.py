@@ -2,6 +2,7 @@ from Controller.ViewHandler import ViewHandler
 from Controller.ViewRegister import ViewRegister
 from Model.Book import Book
 from Model.Model import Model
+from Model.Title import Title
 from View.Views import View, MainView
 
 
@@ -32,7 +33,8 @@ class Controller:
     Loads every title into it's own initiation of the Title-Class
     """
     def loadTitles(self):
-        pass
+        for titleID in self.model.titleIDs:
+            Title(titleID, )
 
     """
     Loads every book into it's own initiation of the Title-Class
