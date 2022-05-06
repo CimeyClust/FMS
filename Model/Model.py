@@ -91,7 +91,9 @@ class Model(object):
     # Insert methode for user
     def insertUser(self, name: str, surname: str, school_class: int):
         with self:
-            self.cursor.execute(f"INSERT INTO BENUTZER (Vorname, Nachname, Klasse) VALUES ('{name}','{surname}', {school_class});")
+            self.cursor.execute(
+                f"INSERT INTO BENUTZER (Vorname, Nachname, Klasse) VALUES ('{name}','{surname}', {school_class});"
+            )
 
     # Get Method for Tables
     def getTable(self, table_name: str):
