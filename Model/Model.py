@@ -8,6 +8,7 @@ class Model(object):
         # Define connection and cursor
         self.connection = sql.connect('fms.db')
         self.cursor = self.connection.cursor()
+        self.createTable()
 
         # Local AppData Directory --> self.connection = sql.connect(f'{os.getenv("LOCALAPPDATA")}\\fms.db')
 
@@ -114,7 +115,6 @@ class Model(object):
 
 
 if __name__ == "__main__":
-    # Model().createTable()
     with Model() as db:
         db.insertUser("Yassin", "Starzetz", 1011)
         db.insertUser("Luis", "Hamann", 1011)
