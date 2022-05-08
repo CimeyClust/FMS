@@ -1,7 +1,7 @@
 import sqlite3
 import pandas as pd
 
-# Convert database to Scratch
+
 def toCSV(self):
     connection = sqlite3.connect('fms.db')
     cursor = connection.cursor()
