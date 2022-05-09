@@ -3,7 +3,6 @@ from Controller.ViewRegister import ViewRegister
 from Model import Book, Student, Subject, Title
 from Model.Model import Model
 from View.Views import View, MainView
-from pythonlangutil.overload import Overload, signature
 
 
 class Controller:
@@ -94,9 +93,13 @@ class Controller:
     """
     Just return no borrowed books onlyBorrowed = false
     If onlyBorrowed = true, only already borrowed books will be returned
+    Return all books if onlyBorrowed is not given
     """
-    def getBooks(self, onlyBorrowed: bool):
+    def getBooks(self, onlyBorrowed: bool = None):
         borrowedBooks = []
+        if onlyBorrowed is None:
+            return Book.books
+
         if onlyBorrowed:
             for book in Book.books:
                 if book.borrowed:
@@ -106,10 +109,3 @@ class Controller:
                 if not book.borrowed:
                     borrowedBooks.append(book)
         return borrowedBooks
-
-    """
-    Return all books, ignoring the borrowed state
-    """
-    @Overload
-    def getBooks(self):
-        return Book.books
