@@ -61,19 +61,15 @@ class Model(object):
         self.cursor.execute(table_titel)
         self.cursor.execute(table_fachbereich)
 
+    # Deletes the database
     def dumpDatabase(self):
         self.connection.close()
         os.remove("fms.db")
 
     # Deletes all tables
-    def dumpTable(self, reload: bool):
-        self.cursor.execute("DROP TABLE IF EXISTS BENUTZER")
-        self.cursor.execute("DROP TABLE IF EXISTS AUSLEIHE")
-        self.cursor.execute("DROP TABLE IF EXISTS EXEMPLAR")
-        self.cursor.execute("DROP TABLE IF EXISTS TITEL")
-        self.cursor.execute("DROP TABLE IF EXISTS FACHBEREICH")
-        if reload:
-            self.createTable()
+    def dumpTable(self, tables: list):
+        for table in tables:
+            self.cursor.execute(f"DROP TABLE IF EXISTS {table}")
 
     # Returns information about all tables in the database
     def tableInfo(self):
@@ -82,16 +78,14 @@ class Model(object):
         for table_name in tables:
             table_name = table_name[0]
             table = pd.read_sql_query(f"SELECT * from {table_name}", self.connection)
-            print(table_name)
-            print(table)
-            print("")
+            print(table_name+"\n", table, "\n")
 
     # Generell execute method for custom sql query
     def execute(self, query):
         self.cursor.execute(query)
 
     # Get Method for Tables
-    def getTable(self, column: str, table_name: str):
+    def getTable(self, table_name: str, column: str):
         self.cursor.execute(f"SELECT {column} FROM {table_name};")
         return self.cursor.fetchall()
 
@@ -115,12 +109,11 @@ class Model(object):
 
 
 if __name__ == "__main__":
+    # Model().dumpDatabase()
     with Model() as db:
         db.insertUser("Yassin", "Starzetz", 1011)
         db.insertUser("Luis", "Hamann", 1011)
+        db.insertUser("Leon", "Martin", 1011)
+        db.insertUser("Jan", "Weinsheimer", 1011)
         db.tableInfo()
-        print(db.getTable("*", "BENUTZER"))
-        print(db.getTable("Vorname", "BENUTZER"))
-        db.dumpTable(True)
-
-    # Model().dumpDatabase()
+        db.dumpTable(['BENUTZER'])
