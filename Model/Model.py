@@ -1,6 +1,7 @@
 import os
 import sqlite3 as sql
 import pandas as pd
+import datetime
 
 
 class Model(object):
@@ -26,9 +27,8 @@ class Model(object):
                              VorgangsID INTEGER PRIMARY KEY,
                              BenutzerID INTEGER UNSIGNED NOT NULL,
                              ExemplarID INTEGER UNSIGNED NOT NULL,
-                             DatumEntleihe TIMESTAMP NULL DEFAULT NULL,
-                             DatumRückgabe TIMESTAMP NULL DEFAULT NULL,
-                             Bemerkung TEXT NOT NULL,
+                             DatumEntleihe DATE NULL DEFAULT NULL,
+                             DatumRückgabe DATE NULL DEFAULT NULL,
                              FOREIGN KEY (BenutzerID) REFERENCES `BENUTZER`(`BenutzerID`) ON DELETE CASCADE,
                              FOREIGN KEY (ExemplarID) REFERENCES `EXEMPLAR`(`ExemplarID`) ON DELETE CASCADE
                          ); """
@@ -43,9 +43,9 @@ class Model(object):
         table_titel = """ CREATE TABLE IF NOT EXISTS TITEL (
                           TitelID INTEGER PRIMARY KEY,
                           FachbereichsID INTEGER UNSIGNED NOT NULL,
-                          Titel VARCHAR(255) NOT NULL,
-                          ISBN INTEGER(13) NULL DEFAULT NULL,
+                          Titelname VARCHAR(255) NOT NULL,
                           Autor VARCHAR(255) NOT NULL,
+                          ISBN VARCHAR(13) NULL DEFAULT NULL,
                           FOREIGN KEY (FachbereichsID) REFERENCES `FACHBEREICH`(`FachbereichsID`) ON DELETE CASCADE
                       ); """
 
@@ -78,7 +78,7 @@ class Model(object):
         for table_name in tables:
             table_name = table_name[0]
             table = pd.read_sql_query(f"SELECT * from {table_name}", self.connection)
-            print(table_name+"\n", table, "\n")
+            print(table_name + "\n", table, "\n")
 
     # Generell execute method for custom sql query
     def execute(self, query):
@@ -90,8 +90,68 @@ class Model(object):
         return self.cursor.fetchall()
 
     # Insert methode for user
-    def insertUser(self, name: str, surname: str, school_class: int):
-        self.cursor.execute(f"INSERT INTO BENUTZER (Vorname, Nachname, Klasse) VALUES ('{name}','{surname}', {school_class});")
+    def insertBenutzer(self, name: str, surname: str, school_class: int):
+        self.cursor.execute(
+            "INSERT INTO BENUTZER (Vorname, Nachname, Klasse) "
+            "VALUES (?, ?, ?);", (name, surname, school_class)
+        )
+
+    def insertAusleihe(self, benutzer_id: int, exemplar_id: int, datum_entleihe: datetime, datum_rueckgabe: datetime):
+        self.cursor.execute(
+            "INSERT INTO AUSLEIHE (BenutzerID, ExemplarID, DatumEntleihe, DatumRückgabe) "
+            "VALUES (?, ?, ?, ?);", (benutzer_id, exemplar_id, datum_entleihe, datum_rueckgabe)
+        )
+
+    def insertExemplar(self, titel_id: int, bemerkung: str):
+        self.cursor.execute(
+            "INSERT INTO EXEMPLAR (TitelID, Bemerkung) "
+            "VALUES (?, ?);", (titel_id, bemerkung)
+        )
+
+    def insertTitel(self, fachbereichs_id: int, titelname: str, autor: str, isbn: str):
+        self.cursor.execute(
+            "INSERT INTO TITEL (FachbereichsID, Titelname, Autor, ISBN) "
+            "VALUES (?, ?, ?, ?);", (fachbereichs_id, titelname, autor, isbn)
+        )
+
+    def insertFachbereich(self, fachbereichsname: str):
+        self.cursor.execute("INSERT INTO FACHBEREICH (Fachbereichsname) "
+                            "VALUES (?);", (fachbereichsname, ))
+
+    # Get all IDs of the title entity
+    def getTitleIDs(self):
+        self.cursor.execute("SELECT TitelID FROM TITEL;")
+        return self.cursor.fetchall()
+
+    # Get the title of a Title entity by its id
+    def getTitleTitle(self, titel_id: int):
+        self.cursor.execute(f"SELECT Titel FROM TITEL WHERE TitelID = {titel_id};")
+        return self.cursor.fetchone()
+
+    # Get the isbn of a Title entity by its id
+    def getTitleISBN(self, titel_id: int):
+        self.cursor.execute(f"SELECT ISBN FROM TITEL WHERE TitelID = {titel_id};")
+        return self.cursor.fetchone()
+
+    # Get the author of a Title entity by its id
+    def getTitleAuthor(self, titel_id: int):
+        self.cursor.execute(f"SELECT Autor FROM TITEL WHERE TitelID = {titel_id};")
+        return self.cursor.fetchone()
+
+    # Get the subject id of a Title entity by its id
+    def getTitleSubjectID(self, titel_id: int):
+        self.cursor.execute(f"SELECT FachbereichsID FROM TITEL WHERE TitelID = {titel_id};")
+        return self.cursor.fetchone()
+
+    # Get all ids of the Fachwerk Entity
+    def getSubjectIDs(self):
+        self.cursor.execute("SELECT FachbereichsID FROM FACHBEREICH;")
+        return self.cursor.fetchall()
+
+    # Get the title of the subject by its FachwerkID
+    def getSubjectName(self, titel_id: int):
+        self.cursor.execute(f"SELECT Fachbereichsname FROM FACHBEREICH WHERE FachbereichsID = {titel_id};")
+        return self.cursor.fetchone()
 
     # Get all IDs of the title entity
     def getTitleIDs(self):
@@ -144,11 +204,25 @@ class Model(object):
 
 
 if __name__ == "__main__":
-    # Model().dumpDatabase()
+    Model().dumpDatabase()
     with Model() as db:
-        db.insertUser("Yassin", "Starzetz", 1011)
-        db.insertUser("Luis", "Hamann", 1011)
-        db.insertUser("Leon", "Martin", 1011)
-        db.insertUser("Jan", "Weinsheimer", 1011)
+        db.insertBenutzer("Yassin", "Starzetz", 1011)
+        db.insertBenutzer("Luis", "Hamann", 1011)
+        db.insertBenutzer("Leon", "Martin", 1011)
+        db.insertFachbereich("Mathe")
+        db.insertFachbereich("Englisch")
+        db.insertTitel(1, "Math - the Book", "Dr. Bum", "1154848942134")
+        db.insertTitel(1, "1 + 1 die Basics", "Smith Johnson", "1157496342456")
+        db.insertTitel(2, "learn english", "Erwin Arlert", "1685645422381")
+        db.insertExemplar(1, "sieht gut aus")
+        db.insertExemplar(2, "bisl zerkratzt")
+        db.insertExemplar(2, "Flasche ausgeschüttet")
+        db.insertExemplar(3, "wurde aus Versehen verbrannt")
+        db.insertExemplar(3, "wurde reingemalt")
+        db.insertAusleihe(1, 1, datetime.date.today(), datetime.date.today())
+        db.insertAusleihe(2, 3, datetime.date.today(), datetime.date.today())
+        db.insertAusleihe(3, 4, datetime.date.today(), datetime.date.today())
         db.tableInfo()
-        db.dumpTable(['BENUTZER'])
+        print(db.getTable("BENUTZER", "*"))
+        print(db.getTable("BENUTZER", "Vorname, Nachname"))
+        db.dumpTable(['BENUTZER', 'AUSLEIHE', 'EXEMPLAR', 'TITEL', 'FACHWERK'])
