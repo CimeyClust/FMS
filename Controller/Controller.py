@@ -2,6 +2,7 @@ from Controller.ViewHandler import ViewHandler
 from Controller.ViewRegister import ViewRegister
 from Model.Book import Book
 from Model.Model import Model
+from Model import Subject
 from Model.Title import Title
 from View.Views import View, MainView
 
@@ -27,20 +28,33 @@ class Controller:
     Loads every subject into it's own initiation of the Subject-Class
     """
     def loadSubjects(self):
-        pass
+        with Model() as db:
+            for subjectID in db.getSubjectIDs():
+                Subject.Subject(
+                    subjectID,
+                    db.getSubjectName(subjectID)
+                )
 
     """
     Loads every title into it's own initiation of the Title-Class
     """
     def loadTitles(self):
-        for titleID in self.model.titleIDs:
-            Title(titleID, )
+        with Model() as db:
+            for titleID in db.getTitleIDs():
+                Title(
+                    titleID,
+                    db.getTitleTitle(titleID),
+                    db.getTitleISBN(titleID),
+                    db.getTitleAuthor(titleID),
+                    Subject.getSubject(db.getTitleSubjectID(titleID))
+                )
 
     """
     Loads every book into it's own initiation of the Title-Class
     """
     def loadBooks(self):
-        pass
+        with Model() as db:
+            
 
     """
     Return all books if onlyBorrowed = false

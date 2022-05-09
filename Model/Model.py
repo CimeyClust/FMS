@@ -93,6 +93,41 @@ class Model(object):
     def insertUser(self, name: str, surname: str, school_class: int):
         self.cursor.execute(f"INSERT INTO BENUTZER (Vorname, Nachname, Klasse) VALUES ('{name}','{surname}', {school_class});")
 
+    # Get all IDs of the title entity
+    def getTitleIDs(self):
+        self.cursor.execute("SELECT TitelID FROM TITEL;")
+        return self.cursor.fetchall()
+
+    # Get the title of a Title entity by it's id
+    def getTitleTitle(self, id: int):
+        self.cursor.execute(f"SELECT Titel FROM TITEL WHERE TitelID = {id};")
+        return self.cursor.fetchone()
+
+    # Get the isbn of a Title entity by it's id
+    def getTitleISBN(self, id: int):
+        self.cursor.execute(f"SELECT ISBN FROM TITEL WHERE TitelID = {id};")
+        return self.cursor.fetchone()
+
+    # Get the author of a Title entity by it's id
+    def getTitleAuthor(self, id: int):
+        self.cursor.execute(f"SELECT Autor FROM TITEL WHERE TitelID = {id};")
+        return self.cursor.fetchone()
+
+    # Get the subject id of a Title entity by it's id
+    def getTitleSubjectID(self, id: int):
+        self.cursor.execute(f"SELECT FachbereichsID FROM TITEL WHERE TitelID = {id};")
+        return self.cursor.fetchone()
+
+    # Get all ids of the Fachwerk Entity
+    def getSubjectIDs(self):
+        self.cursor.execute("SELECT FachbereichsID FROM FACHBEREICH;")
+        return self.cursor.fetchall()
+
+    # Get the title of the subject by it's FachwerkID
+    def getSubjectName(self, id: int):
+        self.cursor.execute(f"SELECT Fachbereichsname FROM FACHBEREICH WHERE FachbereichsID = {id};")
+        return self.cursor.fetchone()
+
     # Context Manager
     def __enter__(self):
         print("\nConnected to the database...\n")

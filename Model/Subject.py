@@ -6,3 +6,10 @@ class Subject:
         self.subjectTitle = subjectTitle
 
         subjects.append(self)
+
+
+def getSubject(id: int):
+    for subject in subjects:
+        if subject.id == id:
+            return subject
+    return None
