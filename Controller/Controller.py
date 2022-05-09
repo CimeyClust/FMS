@@ -1,9 +1,7 @@
 from Controller.ViewHandler import ViewHandler
 from Controller.ViewRegister import ViewRegister
-from Model import Book
+from Model import Book, Student, Subject, Title
 from Model.Model import Model
-from Model import Subject
-from Model.Title import Title
 from View.Views import View, MainView
 from pythonlangutil.overload import Overload, signature
 
@@ -51,7 +49,7 @@ class Controller:
     def loadTitles(self):
         with Model() as db:
             for titleID in db.getTitleIDs():
-                Title(
+                Title.Title(
                     titleID,
                     db.getTitleTitle(titleID),
                     db.getTitleISBN(titleID),
@@ -66,7 +64,10 @@ class Controller:
         with Model() as db:
             for bookID in db.getBookIDs():
                 Book.Book(
-                    bookID
+                    bookID,
+                    db.isBorrowed(bookID),
+                    Title.getTitle(db.getBookTitleID()),
+                    Student.getStudent()
                 )
 
     """
