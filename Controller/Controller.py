@@ -58,17 +58,38 @@ class Controller:
                 )
 
     """
+    Loads every student into it's own initiation of the Student-Class
+    """
+
+    def loadStudents(self):
+        with Model() as db:
+            for studentID in db.getStudentIDs():
+                Student.Student(
+                    studentID,
+                    db.getStudentSurName(studentID),
+                    db.getStudenLastName(studentID),
+                    db.getStudentSchoolClass(studentID)
+                )
+
+    """
     Loads every book into it's own initiation of the Book-Class
     """
     def loadBooks(self):
         with Model() as db:
             for bookID in db.getBookIDs():
-                Book.Book(
-                    bookID,
-                    db.isBorrowed(bookID),
-                    Title.getTitle(db.getBookTitleID()),
-                    Student.getStudent()
-                )
+                if db.isBookBorrowed():
+                    Book.Book(
+                        bookID,
+                        db.isBookBorrowed(bookID),
+                        Title.getTitle(db.getBookTitleID()),
+                        Student.getStudent(db.getBookStudentID())
+                    )
+                else:
+                    Book.Book(
+                        bookID,
+                        db.isBookBorrowed(bookID),
+                        Title.getTitle(db.getBookTitleID())
+                    )
 
     """
     Just return no borrowed books onlyBorrowed = false

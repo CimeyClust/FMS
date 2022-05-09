@@ -1,11 +1,11 @@
 students = []
 
 class Student:
-    def __init__(self, id: int, surName: str, lastName: str, group: str):
+    def __init__(self, id: int, surName: str, lastName: str, schoolClass: str):
         self.id = id
         self.surName = surName
         self.lastName = lastName
-        self.group = group
+        self.schoolClass = schoolClass
 
         students.append(self)
 
