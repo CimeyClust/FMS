@@ -1,8 +1,7 @@
 import os
 import sqlite3 as sql
 import pandas as pd
-from datetime import datetime
-import timestamp
+import datetime
 
 
 class Model(object):
@@ -28,8 +27,8 @@ class Model(object):
                              VorgangsID INTEGER PRIMARY KEY,
                              BenutzerID INTEGER UNSIGNED NOT NULL,
                              ExemplarID INTEGER UNSIGNED NOT NULL,
-                             DatumEntleihe TIMESTAMP NULL DEFAULT NULL,
-                             DatumRückgabe TIMESTAMP NULL DEFAULT NULL,
+                             DatumEntleihe DATE NULL DEFAULT NULL,
+                             DatumRückgabe DATE NULL DEFAULT NULL,
                              FOREIGN KEY (BenutzerID) REFERENCES `BENUTZER`(`BenutzerID`) ON DELETE CASCADE,
                              FOREIGN KEY (ExemplarID) REFERENCES `EXEMPLAR`(`ExemplarID`) ON DELETE CASCADE
                          ); """
@@ -93,40 +92,33 @@ class Model(object):
     # Insert methode for user
     def insertBenutzer(self, name: str, surname: str, school_class: int):
         self.cursor.execute(
-            f"INSERT INTO BENUTZER (Vorname, Nachname, Klasse) "
-            f"VALUES ('{name}', '{surname}', {school_class});"
+            "INSERT INTO BENUTZER (Vorname, Nachname, Klasse) "
+            "VALUES (?, ?, ?);", (name, surname, school_class)
         )
 
-    def insertAusleihe(self, benutzer_id: int, exemplar_id: int, datum_entleihe: timestamp, datum_rueckgabe: timestamp):
+    def insertAusleihe(self, benutzer_id: int, exemplar_id: int, datum_entleihe: datetime, datum_rueckgabe: datetime):
         self.cursor.execute(
-            f"INSERT INTO TITEL (FachbereichsID, Titelname, Autor, ISBN) "
-            f"VALUES ({benutzer_id}, {exemplar_id}, {datum_entleihe}, {datum_rueckgabe});"
+            "INSERT INTO AUSLEIHE (BenutzerID, ExemplarID, DatumEntleihe, DatumRückgabe) "
+            "VALUES (?, ?, ?, ?);", (benutzer_id, exemplar_id, datum_entleihe, datum_rueckgabe)
         )
 
     def insertExemplar(self, titel_id: int, bemerkung: str):
         self.cursor.execute(
-            f"INSERT INTO EXEMPLAR (TitelID, Bemerkung) "
-            f"VALUES ({titel_id}, '{bemerkung}');"
+            "INSERT INTO EXEMPLAR (TitelID, Bemerkung) "
+            "VALUES (?, ?);", (titel_id, bemerkung)
         )
 
     def insertTitel(self, fachbereichs_id: int, titelname: str, autor: str, isbn: str):
         self.cursor.execute(
-            f"INSERT INTO TITEL (FachbereichsID, Titelname, Autor, ISBN) "
-            f"VALUES ({fachbereichs_id}, '{titelname}', '{autor}', '{isbn}');"
+            "INSERT INTO TITEL (FachbereichsID, Titelname, Autor, ISBN) "
+            "VALUES (?, ?, ?, ?);", (fachbereichs_id, titelname, autor, isbn)
         )
 
     def insertFachbereich(self, fachbereichsname: str):
-        self.cursor.execute(
-            f"INSERT INTO FACHBEREICH (Fachbereichsname) "
-            f"VALUES ('{fachbereichsname}');"
-        )
+        self.cursor.execute("INSERT INTO FACHBEREICH (Fachbereichsname) "
+                            "VALUES (?);", (fachbereichsname, ))
 
-    ####################################################################################################################
-
-<<<<<<< Updated upstream
-=======
     # Get all IDs of the title entity
-
     def getTitleIDs(self):
         self.cursor.execute("SELECT TitelID FROM TITEL;")
         return self.cursor.fetchall()
@@ -161,9 +153,6 @@ class Model(object):
         self.cursor.execute(f"SELECT Fachbereichsname FROM FACHBEREICH WHERE FachbereichsID = {titel_id};")
         return self.cursor.fetchone()
 
-    ####################################################################################################################
-
->>>>>>> Stashed changes
     # Context Manager
     def __enter__(self):
         print("\nConnected to the database...\n")
@@ -195,9 +184,9 @@ if __name__ == "__main__":
         db.insertExemplar(2, "Flasche ausgeschüttet")
         db.insertExemplar(3, "wurde aus Versehen verbrannt")
         db.insertExemplar(3, "wurde reingemalt")
-        db.insertAusleihe(1, 1, datetime.timestamp(datetime.now()), datetime.timestamp(datetime.now()))
-        db.insertAusleihe(2, 3, datetime.timestamp(datetime.now()), datetime.timestamp(datetime.now()))
-        db.insertAusleihe(3, 4, datetime.timestamp(datetime.now()), datetime.timestamp(datetime.now()))
+        db.insertAusleihe(1, 1, datetime.date.today(), datetime.date.today())
+        db.insertAusleihe(2, 3, datetime.date.today(), datetime.date.today())
+        db.insertAusleihe(3, 4, datetime.date.today(), datetime.date.today())
         db.tableInfo()
         print(db.getTable("BENUTZER", "*"))
         print(db.getTable("BENUTZER", "Vorname, Nachname"))
