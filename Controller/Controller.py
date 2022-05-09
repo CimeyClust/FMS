@@ -1,10 +1,11 @@
 from Controller.ViewHandler import ViewHandler
 from Controller.ViewRegister import ViewRegister
-from Model.Book import Book
+from Model import Book
 from Model.Model import Model
 from Model import Subject
 from Model.Title import Title
 from View.Views import View, MainView
+from pythonlangutil.overload import Overload, signature
 
 
 class Controller:
@@ -16,6 +17,15 @@ class Controller:
 
         # Model
         self.model = Model()
+
+        # Load all subjects into instances
+        self.loadSubjects()
+
+        # Load all titles into instances with also a subject instance
+        self.loadTitles()
+
+        # Load all book instances (Exemplare) at least
+        self.loadBooks()
 
         # CallbackHandler
         # Load the main view, which enable the window
@@ -50,17 +60,34 @@ class Controller:
                 )
 
     """
-    Loads every book into it's own initiation of the Title-Class
+    Loads every book into it's own initiation of the Book-Class
     """
     def loadBooks(self):
         with Model() as db:
-            
+            for bookID in db.getBookIDs():
+                Book.Book(
+                    bookID
+                )
 
     """
-    Return all books if onlyBorrowed = false
+    Just return no borrowed books onlyBorrowed = false
     If onlyBorrowed = true, only already borrowed books will be returned
     """
-    def getAllBooks(self, onlyBorrowed: bool):
-        exampleBooks: list[Book] = []
+    def getBooks(self, onlyBorrowed: bool):
+        borrowedBooks = []
+        if onlyBorrowed:
+            for book in Book.books:
+                if book.borrowed:
+                    borrowedBooks.append(book)
+        else:
+            for book in Book.books:
+                if not book.borrowed:
+                    borrowedBooks.append(book)
+        return borrowedBooks
 
-        return exampleBooks
+    """
+    Return all books, ignoring the borrowed state
+    """
+    @Overload
+    def getBooks(self):
+        return Book.books

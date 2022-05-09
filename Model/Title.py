@@ -11,3 +11,10 @@ class Title:
         self.subject = subject
 
         titles.append(self)
+
+
+def getTitle(id: int):
+    for title in titles:
+        if title.id == id:
+            return title
+    return None
