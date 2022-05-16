@@ -20,11 +20,14 @@ class View:
 
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 class MainView(View):
     def __init__(self):
         # Enable the view and show it in the window
         pass
 =======
+=======
+>>>>>>> Stashed changes
 customtkinter.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
 customtkinter.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
 
@@ -265,6 +268,9 @@ class MainView(View, customtkinter.CTk):
 
     def start(self):
         self.mainloop()
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 
     # Hide the current view and disable it
