@@ -1,4 +1,4 @@
-from SQLiteModel.Subject import Subject
+from Model.Subject import Subject
 
 titles = []
 

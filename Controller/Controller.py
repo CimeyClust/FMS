@@ -32,7 +32,7 @@ class Controller:
         # A new view will be instantiated every time it switches
         # Use self.viewHandler.initiateView() to set a new view and kill the old one
         # Set Main windows on startup
-        self.viewHandler = ViewHandler(ViewRegister.MAIN_VIEW.value)
+        self.viewHandler = ViewHandler(ViewRegister.MAIN_VIEW.value, (), self.getBooks())
 
     """
     Loads every subject into it's own initiation of the Subject-Class

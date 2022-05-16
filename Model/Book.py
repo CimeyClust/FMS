@@ -1,5 +1,5 @@
-from SQLiteModel.Title import Title
-from SQLiteModel.Student import Student
+from Model.Title import Title
+from Model.Student import Student
 
 books = []
 
