@@ -153,6 +153,30 @@ class Model(object):
         self.cursor.execute(f"SELECT Fachbereichsname FROM FACHBEREICH WHERE FachbereichsID = {titel_id};")
         return self.cursor.fetchone()
 
+    def getStudentIDs(self):
+        self.cursor.execute("SELECT BenutzerID FROM BENUTZER;")
+        return self.cursor.fetchall()
+
+    def getStudentSurName(self, benutzer_id: int):                 #-> str
+        self.cursor.execute(f"SELECT Vorname FROM BENUTZER WHERE BenutzerID = {benutzer_id};")
+        return self.cursor.fetchone()
+
+    def getStudentLastName(self, benutzer_id: int):                # -> str
+        self.cursor.execute(f"SELECT Nachname FROM BENUTZER WHERE BenutzerID = {benutzer_id};")
+        return self.cursor.fetchone()
+
+    def getStudentSchoolClass(self, benutzer_id: int):             #-> str
+        self.cursor.execute(f"SELECT Klasse FROM BENUTZER WHERE BenutzerID = {benutzer_id};")
+        return self.cursor.fetchone()
+
+    def getBookIDs(self):                               #-> list(int)
+        self.cursor.execute("SELECT ExemplarID FROM EXEMPLAR;")
+        return self.cursor.fetchall()
+
+    def isBookBorrowed(self, exemplar_id: int):                    #-> bool
+        self.cursor.execute(f"SELECT  FROM EXEMPLAR WHERE ExemplarID = {exemplar_id};")
+        return self.cursor.fetchone()
+
     # Context Manager
     def __enter__(self):
         print("\nConnected to the database...\n")
