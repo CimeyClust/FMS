@@ -4,7 +4,7 @@ import pandas as pd
 import datetime
 
 
-class Model(object):
+class SQLiteModel(object):
     def __init__(self):
         # Define connection and cursor
         self.connection = sql.connect('fms.db')
@@ -157,6 +157,7 @@ class Model(object):
         self.cursor.execute("SELECT BenutzerID FROM BENUTZER;")
         return self.cursor.fetchall()
 
+<<<<<<< Updated upstream
     def getStudentSurName(self, benutzer_id: int):                 #-> str
         self.cursor.execute(f"SELECT Vorname FROM BENUTZER WHERE BenutzerID = {benutzer_id};")
         return self.cursor.fetchone()
@@ -176,6 +177,30 @@ class Model(object):
     def isBookBorrowed(self, exemplar_id: int):                    #-> bool
         self.cursor.execute(f"SELECT  FROM EXEMPLAR WHERE ExemplarID = {exemplar_id};")
         return self.cursor.fetchone()
+=======
+    def getStudentSurName(self, benutzer_id: int):  # -> str
+        self.cursor.execute(f"SELECT Vorname FROM BENUTZER WHERE BenutzerID = {benutzer_id};")
+        return self.cursor.fetchone()
+
+    def getStudentLastName(self, benutzer_id: int):  # -> str
+        self.cursor.execute(f"SELECT Nachname FROM BENUTZER WHERE BenutzerID = {benutzer_id};")
+        return self.cursor.fetchone()
+
+    def getStudentSchoolClass(self, benutzer_id: int):  # -> str
+        self.cursor.execute(f"SELECT Klasse FROM BENUTZER WHERE BenutzerID = {benutzer_id};")
+        return self.cursor.fetchone()
+
+    def getBookIDs(self):  # -> list(int)
+        self.cursor.execute("SELECT ExemplarID FROM EXEMPLAR;")
+        return self.cursor.fetchall()
+
+    def isBookBorrowed(self, exemplar_id: int):  # -> bool
+        self.cursor.execute(f"SELECT ExemplarID FROM AUSLEIHE WHERE ExemplarID = {exemplar_id};")
+        if self.cursor.fetchone() is None:
+            return False
+
+        return True
+>>>>>>> Stashed changes
 
     # Context Manager
     def __enter__(self):
@@ -193,8 +218,8 @@ class Model(object):
 
 
 if __name__ == "__main__":
-    Model().dumpDatabase()
-    with Model() as db:
+    SQLiteModel().dumpDatabase()
+    with SQLiteModel() as db:
         db.insertBenutzer("Yassin", "Starzetz", 1011)
         db.insertBenutzer("Luis", "Hamann", 1011)
         db.insertBenutzer("Leon", "Martin", 1011)

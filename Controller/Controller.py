@@ -1,5 +1,8 @@
 from Controller.ViewHandler import ViewHandler
-from Model.Model import Model
+from Controller.ViewRegister import ViewRegister
+from Model import Book, Subject, Student
+from Model.SQLiteModel import SQLiteModel
+from Model import Title
 from View.Views import View, MainView
 
 
@@ -8,7 +11,7 @@ class Controller:
         mainView = MainView()
 
         # Model
-        self.model = Model()
+        self.model = SQLiteModel()
 
         self.getTitles()
 
@@ -24,10 +27,9 @@ class Controller:
         # CallbackHandler
         # Load the main view, which enable the window
         # A new view will be instantiated every time it switches
-<<<<<<< Updated upstream
+
         # Use self.callbackHandler.initiateView() to set a new view and kill the old one
-        self.callbackHandler = ViewHandler(MainView())
-=======
+
         # Use self.viewHandler.initiateView() to set a new view and kill the old one
         # Set Main windows on startup
         self.viewHandler = ViewHandler(ViewRegister.MAIN_VIEW.value, (), self.getBooks())
@@ -36,7 +38,7 @@ class Controller:
     Loads every subject into it's own initiation of the Subject-Class
     """
     def loadSubjects(self):
-        with Model() as db:
+        with SQLiteModel() as db:
             for subjectID in db.getSubjectIDs():
                 Subject.Subject(
                     subjectID,
@@ -47,7 +49,7 @@ class Controller:
     Loads every title into it's own initiation of the Title-Class
     """
     def loadTitles(self):
-        with Model() as db:
+        with SQLiteModel() as db:
             for titleID in db.getTitleIDs():
                 Title.Title(
                     titleID,
@@ -62,7 +64,7 @@ class Controller:
     """
 
     def loadStudents(self):
-        with Model() as db:
+        with SQLiteModel() as db:
             for studentID in db.getStudentIDs():
                 Student.Student(
                     studentID,
@@ -75,9 +77,9 @@ class Controller:
     Loads every book into it's own initiation of the Book-Class
     """
     def loadBooks(self):
-        with Model() as db:
+        with SQLiteModel() as db:
             for bookID in db.getBookIDs():
-                if db.isBookBorrowed():
+                if db.isBookBorrowed(bookID):
                     Book.Book(
                         bookID,
                         db.isBookBorrowed(bookID),
@@ -110,4 +112,3 @@ class Controller:
                 if not book.borrowed:
                     borrowedBooks.append(book)
         return borrowedBooks
->>>>>>> Stashed changes
