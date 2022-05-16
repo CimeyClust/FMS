@@ -1,7 +1,7 @@
 from Controller.ViewHandler import ViewHandler
 from Controller.ViewRegister import ViewRegister
 from Model import Book, Student, Subject, Title
-from Model.Model import Model
+from Model.SQLiteModel import Model
 from View.Views import View, MainView
 
 
@@ -20,6 +20,9 @@ class Controller:
 
         # Load all titles into instances with also a subject instance
         self.loadTitles()
+
+        # Load all students into instances of Student
+        self.loadStudents()
 
         # Load all book instances (Exemplare) at least
         self.loadBooks()
