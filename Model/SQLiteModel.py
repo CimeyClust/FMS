@@ -175,7 +175,7 @@ class Model(object):
 
     def isBookBorrowed(self, exemplar_id: int):                    #-> bool
         self.cursor.execute(f"SELECT  FROM EXEMPLAR WHERE ExemplarID = {exemplar_id};")
-        return self.cursor.fetchall()
+        return self.cursor.fetchone()
 
     # Context Manager
     def __enter__(self):
