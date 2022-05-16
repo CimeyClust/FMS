@@ -154,7 +154,7 @@ class Model(object):
         return self.cursor.fetchone()
 
     def getStudentIDs(self):
-        self.cursor.execute("SELECT TitelID FROM TITEL;")
+        self.cursor.execute("SELECT BenutzerID FROM Benutzer;")
         return self.cursor.fetchall()
 
     def getStudentSurName(self, benutzer_id: int):                 #-> str
