@@ -1,35 +1,33 @@
 from Controller.ViewHandler import ViewHandler
-from Controller.ViewRegister import ViewRegister
-from Model import Book, Student, Subject, Title
-from Model.SQLiteModel import Model
+from Model.Model import Model
 from View.Views import View, MainView
 
 
 class Controller:
-    """
-    Init the controller
-    """
     def __init__(self):
         mainView = MainView()
 
         # Model
         self.model = Model()
 
-        # Load all subjects into instances
-        self.loadSubjects()
+        self.getTitles()
 
-        # Load all titles into instances with also a subject instance
-        self.loadTitles()
-
-        # Load all students into instances of Student
-        self.loadStudents()
-
-        # Load all book instances (Exemplare) at least
-        self.loadBooks()
+    def getTitles(self):
+        examples = {
+            1: {
+                "title": "10 Wege um so schlau zu werden, wie Leon."
+            }
+        }
+        for exampleKey in examples.keys():
+            print(examples[exampleKey]["title"])
 
         # CallbackHandler
         # Load the main view, which enable the window
         # A new view will be instantiated every time it switches
+<<<<<<< Updated upstream
+        # Use self.callbackHandler.initiateView() to set a new view and kill the old one
+        self.callbackHandler = ViewHandler(MainView())
+=======
         # Use self.viewHandler.initiateView() to set a new view and kill the old one
         # Set Main windows on startup
         self.viewHandler = ViewHandler(ViewRegister.MAIN_VIEW.value, (), self.getBooks())
@@ -112,3 +110,4 @@ class Controller:
                 if not book.borrowed:
                     borrowedBooks.append(book)
         return borrowedBooks
+>>>>>>> Stashed changes
