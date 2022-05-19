@@ -1,3 +1,4 @@
+from Controller.CallbackRegister import Callback
 from Controller.ViewHandler import ViewHandler
 from Controller.ViewRegister import ViewRegister
 from Model import Book, Subject, Student
@@ -32,7 +33,7 @@ class Controller:
 
         # Use self.viewHandler.initiateView() to set a new view and kill the old one
         # Set Main windows on startup
-        self.viewHandler = ViewHandler(ViewRegister.MAIN_VIEW.value, (), self.getBooks())
+        self.viewHandler = ViewHandler(ViewRegister.MAIN_VIEW.value, self, self.getBooks())
 
     """
     Loads every subject into it's own initiation of the Subject-Class
@@ -112,3 +113,14 @@ class Controller:
                 if not book.borrowed:
                     borrowedBooks.append(book)
         return borrowedBooks
+
+    """
+    Handles the callbacks of the view
+    """
+    def handleCallback(self, callbackType: Callback):
+        if callbackType == Callback.ADD_TITLE_BUTTON:
+            pass
+        elif callbackType == Callback.ADD_BOOKS_BUTTON:
+            pass
+        elif callbackType == Callback.CREATE_QR_CODE_BUTTON:
+            pass

@@ -1,3 +1,4 @@
+from functools import partial
 from tkinter.ttk import *
 from email.mime import image
 import tkinter
@@ -6,6 +7,10 @@ from turtle import width
 from webbrowser import BackgroundBrowser
 import customtkinter
 from tkinter import PhotoImage, ttk
+
+from Controller import Controller
+from Controller.CallbackRegister import Callback
+
 global QRIcon
 global Bild1
 
@@ -15,6 +20,9 @@ global Bild1
 
 # The main class every other view is inheriting from
 class View:
+    def initView(self, control: Controller, values: list):
+        pass
+
     def killView(self):
         pass
 
@@ -22,7 +30,7 @@ customtkinter.set_appearance_mode("System")  # Modes: "System" (standard), "Dark
 customtkinter.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
 
 class MainView(View, customtkinter.CTk):
-    def initView(self, *callbacks, values: list):
+    def initView(self, control: Controller, values: list):
         WIDTH = 1200
         HEIGHT = 600
         '''
@@ -144,7 +152,8 @@ class MainView(View, customtkinter.CTk):
         for book, index in zip(values, range(0, len(values) - 1)):
             trv.insert(parent='', index='end', iid=book.id, text=book.title.title,
                        values=(book.title.isbn, book.title.author, book.title.subject.subjectName,
-                               book.student.surName + " " + book.student.lastName))
+                               book.student.surName + " " + book.student.lastName),
+                       command=partial(control.handleCallback, Callback.ADD_BOOKS_BUTTON))
 
         # self.progressbar = customtkinter.CTkProgressBar(master=self.frame_info)
         # self.progressbar.grid(row=1, column=0, sticky="ew", padx=15, pady=15)
