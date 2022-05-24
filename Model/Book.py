@@ -4,11 +4,11 @@ from Model.Student import Student
 books = []
 
 class Book:
-    def __init__(self, id: int, borrowed: bool, title: Title, user: Student = None):
+    def __init__(self, id: int, borrowed: bool, title: Title, student: Student = None):
         self.id = id
         self.borrowed = borrowed
         self.title = title
-        self.user = user
+        self.student = student
 
         books.append(self)
 

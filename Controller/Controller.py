@@ -1,3 +1,4 @@
+from Controller.CallbackRegister import Callback
 from Controller.ViewHandler import ViewHandler
 from Controller.ViewRegister import ViewRegister
 from Model import Book, Subject, Student
@@ -13,17 +14,6 @@ class Controller:
         # Model
         self.model = SQLiteModel()
 
-        self.getTitles()
-
-    def getTitles(self):
-        examples = {
-            1: {
-                "title": "10 Wege um so schlau zu werden, wie Leon."
-            }
-        }
-        for exampleKey in examples.keys():
-            print(examples[exampleKey]["title"])
-
         # CallbackHandler
         # Load the main view, which enable the window
         # A new view will be instantiated every time it switches
@@ -32,7 +22,8 @@ class Controller:
 
         # Use self.viewHandler.initiateView() to set a new view and kill the old one
         # Set Main windows on startup
-        self.viewHandler = ViewHandler(ViewRegister.MAIN_VIEW.value, (), self.getBooks())
+        self.viewHandler = ViewHandler(ViewRegister.MAIN_VIEW.value, self, self.getBooks())
+
 
     """
     Loads every subject into it's own initiation of the Subject-Class
@@ -99,6 +90,11 @@ class Controller:
     Return all books if onlyBorrowed is not given
     """
     def getBooks(self, onlyBorrowed: bool = None):
+        Book.Book(1, False, Title.Title(1, "Test1", "ISBN1", "Ich", Subject.Subject(1, "Mathe")))
+        Book.Book(2, False, Title.Title(2, "Test2", "ISBN2", "Ich", Subject.Subject(2, "Deutsch")))
+        Book.Book(3, False, Title.Title(3, "Test3", "ISBN3", "Ich", Subject.Subject(3, "Englisch")))
+        Book.Book(4, False, Title.Title(4, "Test4", "ISBN4", "Ich", Subject.Subject(4, "Sport")))
+
         borrowedBooks = []
         if onlyBorrowed is None:
             return Book.books
@@ -112,3 +108,14 @@ class Controller:
                 if not book.borrowed:
                     borrowedBooks.append(book)
         return borrowedBooks
+
+    """
+    Handles the callbacks of the view
+    """
+    def handleCallback(self, callbackType: Callback):
+        if callbackType == Callback.ADD_TITLE_BUTTON:
+            pass
+        elif callbackType == Callback.ADD_BOOKS_BUTTON:
+            pass
+        elif callbackType == Callback.CREATE_QR_CODE_BUTTON:
+            pass

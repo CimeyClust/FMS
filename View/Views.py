@@ -1,3 +1,4 @@
+from functools import partial
 from tkinter.ttk import *
 from email.mime import image
 import tkinter
@@ -6,6 +7,11 @@ from turtle import width
 from webbrowser import BackgroundBrowser
 import customtkinter
 from tkinter import PhotoImage, ttk
+import os
+
+from Controller import Controller
+from Controller.CallbackRegister import Callback
+
 global QRIcon
 global Bild1
 
@@ -15,6 +21,9 @@ global Bild1
 
 # The main class every other view is inheriting from
 class View:
+    def initView(self, control: Controller, values: list):
+        pass
+
     def killView(self):
         pass
 
@@ -22,15 +31,15 @@ customtkinter.set_appearance_mode("System")  # Modes: "System" (standard), "Dark
 customtkinter.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
 
 class MainView(View, customtkinter.CTk):
-    def initView(self, *callbacks, values: list):
-        WIDTH = 1200
-        HEIGHT = 600
+    WIDTH = 1200
+    HEIGHT = 600
+    def initView(self, control: Controller, values: list):
         '''
         Values:
         Title: value.title.title
         isbn: value.title.isbn
         autor: value.title.author
-        subject: value.title.subject.subjectName
+        subject: value.title.subject.subjectTitle
         student: value.student.surName + " " + value.student.lastName
         
         Callbacks:
@@ -45,8 +54,8 @@ class MainView(View, customtkinter.CTk):
         self.title("Fachwerk Management System")
         self.geometry(f"{MainView.WIDTH}x{MainView.HEIGHT}")
         # self.minsize(App.WIDTH, App.HEIGHT)
-        QRIcon = PhotoImage(file="images/qriconsmall.png")
-        Bild1 = PhotoImage(file="images/logo.png")
+        QRIcon = PhotoImage(file=f"{os.getcwd()}\View\images\qriconsmall.png")
+        Bild1 = PhotoImage(file=f"{os.getcwd()}\View\images\logo.png")
         # QRIcon=PhotoImage(file="images/qriconsmall.png")
         self.protocol("WM_DELETE_WINDOW", self.on_closing)  # call .on_closing() when app gets closed
 
@@ -142,9 +151,13 @@ class MainView(View, customtkinter.CTk):
         trv['yscrollcommand'] = table_scroll.set
 
         for book, index in zip(values, range(0, len(values) - 1)):
+            student = "---------------"
+            if book.student is not None:
+                student = book.student.surName + " " + book.student.lastName
             trv.insert(parent='', index='end', iid=book.id, text=book.title.title,
-                       values=(book.title.isbn, book.title.author, book.title.subject.subjectName,
-                               book.student.surName + " " + book.student.lastName))
+                       values=(book.title.isbn, book.title.author, book.title.subject.subjectTitle,
+                               student),
+                       command=partial(control.handleCallback, Callback.ADD_BOOKS_BUTTON))
 
         # self.progressbar = customtkinter.CTkProgressBar(master=self.frame_info)
         # self.progressbar.grid(row=1, column=0, sticky="ew", padx=15, pady=15)
