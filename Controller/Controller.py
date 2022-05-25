@@ -117,7 +117,7 @@ class Controller:
     """
     Handles the callbacks of the view
     """
-    def handleCallback(self, callbackType: Callback):
+    def handleCallback(self, callbackType: Callback, values: tuple):
         if callbackType == Callback.ADD_TITLE_BUTTON:
             pass
         elif callbackType == Callback.ADD_BOOKS_BUTTON:
