@@ -155,9 +155,8 @@ class MainView(View, customtkinter.CTk):
             if book.student is not None:
                 student = book.student.surName + " " + book.student.lastName
             trv.insert(parent='', index='end', iid=book.id, text=book.title.title,
-                       values=(book.title.isbn, book.title.author, book.title.subject.subjectTitle,
-                               student),
-                       command=partial(control.handleCallback, Callback.ADD_BOOKS_BUTTON))
+                       values=(book.title.isbn, book.title.author, book.title.subject.subjectTitle, student))
+            # command=partial(control.handleCallback, Callback.ADD_BOOKS_BUTTON)
 
         # self.progressbar = customtkinter.CTkProgressBar(master=self.frame_info)
         # self.progressbar.grid(row=1, column=0, sticky="ew", padx=15, pady=15)
