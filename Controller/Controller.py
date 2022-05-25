@@ -1,3 +1,5 @@
+import datetime
+
 from Controller.CallbackRegister import Callback
 from Controller.ViewHandler import ViewHandler
 from Controller.ViewRegister import ViewRegister
@@ -9,10 +11,17 @@ from View.Views import View, MainView
 
 class Controller:
     def __init__(self):
-        mainView = MainView()
-
         # Model
         self.model = SQLiteModel()
+
+        # Create test database input at beginning
+        self.createTestDatabaseInput()
+
+        # Load data
+        self.loadSubjects()
+        self.loadTitles()
+        self.loadStudents()
+        self.loadBooks()
 
         # CallbackHandler
         # Load the main view, which enable the window
@@ -24,13 +33,13 @@ class Controller:
         # Set Main windows on startup
         self.viewHandler = ViewHandler(ViewRegister.MAIN_VIEW.value, self, self.getBooks())
 
-
     """
     Loads every subject into it's own initiation of the Subject-Class
     """
     def loadSubjects(self):
         with SQLiteModel() as db:
             for subjectID in db.getSubjectIDs():
+                print("Subject: " + str(subjectID))
                 Subject.Subject(
                     subjectID,
                     db.getSubjectName(subjectID)
@@ -90,10 +99,6 @@ class Controller:
     Return all books if onlyBorrowed is not given
     """
     def getBooks(self, onlyBorrowed: bool = None):
-        Book.Book(1, False, Title.Title(1, "Test1", "ISBN1", "Ich", Subject.Subject(1, "Mathe")))
-        Book.Book(2, False, Title.Title(2, "Test2", "ISBN2", "Ich", Subject.Subject(2, "Deutsch")))
-        Book.Book(3, False, Title.Title(3, "Test3", "ISBN3", "Ich", Subject.Subject(3, "Englisch")))
-        Book.Book(4, False, Title.Title(4, "Test4", "ISBN4", "Ich", Subject.Subject(4, "Sport")))
 
         borrowedBooks = []
         if onlyBorrowed is None:
@@ -119,3 +124,24 @@ class Controller:
             pass
         elif callbackType == Callback.CREATE_QR_CODE_BUTTON:
             pass
+
+
+    def createTestDatabaseInput(self):
+        with SQLiteModel() as db:
+            db.insertBenutzer("Yassin", "Starzetz", 1011)
+            db.insertBenutzer("Luis", "Hamann", 1011)
+            db.insertBenutzer("Leon", "Martin", 1011)
+            db.insertFachbereich("Mathe")
+            db.insertFachbereich("Englisch")
+            db.insertTitel(1, "Math - the Book", "Dr. Bum", "1154848942134")
+            db.insertTitel(1, "1 + 1 die Basics", "Smith Johnson", "1157496342456")
+            db.insertTitel(2, "learn english", "Erwin Arlert", "1685645422381")
+            db.insertExemplar(1, "sieht gut aus")
+            db.insertExemplar(2, "bisl zerkratzt")
+            db.insertExemplar(2, "Flasche ausgeschüttet")
+            db.insertExemplar(3, "wurde aus Versehen verbrannt")
+            db.insertExemplar(3, "wurde reingemalt")
+            db.insertAusleihe(1, 1, datetime.date.today(), datetime.date.today())
+            db.insertAusleihe(2, 3, datetime.date.today(), datetime.date.today())
+            db.insertAusleihe(3, 4, datetime.date.today(), datetime.date.today())
+            # db.dumpTable(['BENUTZER', 'AUSLEIHE', 'EXEMPLAR', 'TITEL', 'FACHWERK'])
