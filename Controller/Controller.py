@@ -32,8 +32,8 @@ class Controller:
         with SQLiteModel() as db:
             for subjectID in db.getSubjectIDs():
                 Subject.Subject(
-                    subjectID,
-                    db.getSubjectName(subjectID)
+                    subjectID[0],
+                    db.getSubjectName(subjectID[0])[0]
                 )
 
     """
@@ -43,11 +43,11 @@ class Controller:
         with SQLiteModel() as db:
             for titleID in db.getTitleIDs():
                 Title.Title(
-                    titleID,
-                    db.getTitleTitle(titleID),
-                    db.getTitleISBN(titleID),
-                    db.getTitleAuthor(titleID),
-                    Subject.getSubject(db.getTitleSubjectID(titleID))
+                    titleID[0],
+                    db.getTitleTitle(titleID[0])[0],
+                    db.getTitleISBN(titleID[0])[0],
+                    db.getTitleAuthor(titleID[0])[0],
+                    Subject.getSubject(db.getTitleSubjectID(titleID[0])[0])
                 )
 
     """
@@ -58,10 +58,10 @@ class Controller:
         with SQLiteModel() as db:
             for studentID in db.getStudentIDs():
                 Student.Student(
-                    studentID,
-                    db.getStudentSurName(studentID),
-                    db.getStudenLastName(studentID),
-                    db.getStudentSchoolClass(studentID)
+                    studentID[0],
+                    db.getStudentSurName(studentID[0])[0],
+                    db.getStudentLastName(studentID[0])[0],
+                    db.getStudentSchoolClass(studentID[0])[0]
                 )
 
     """
@@ -70,18 +70,18 @@ class Controller:
     def loadBooks(self):
         with SQLiteModel() as db:
             for bookID in db.getBookIDs():
-                if db.isBookBorrowed(bookID):
+                if db.isBookBorrowed(bookID[0]):
                     Book.Book(
-                        bookID,
-                        db.isBookBorrowed(bookID),
-                        Title.getTitle(db.getBookTitleID()),
-                        Student.getStudent(db.getBookStudentID())
+                        bookID[0],
+                        db.isBookBorrowed(bookID[0]),
+                        Title.getTitle(db.getBookTitleID(bookID[0])[0]),
+                        Student.getStudent(db.getBookStudentID(bookID[0])[0])
                     )
                 else:
                     Book.Book(
-                        bookID,
-                        db.isBookBorrowed(bookID),
-                        Title.getTitle(db.getBookTitleID())
+                        bookID[0],
+                        db.isBookBorrowed(bookID[0]),
+                        Title.getTitle(db.getBookTitleID(bookID[0])[0])
                     )
 
     """

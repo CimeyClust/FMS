@@ -125,7 +125,7 @@ class SQLiteModel(object):
 
     # Get the title of a Title entity by its id
     def getTitleTitle(self, titel_id: int):
-        self.cursor.execute(f"SELECT Titel FROM TITEL WHERE TitelID = {titel_id};")
+        self.cursor.execute(f"SELECT Titelname FROM TITEL WHERE TitelID = {titel_id};")
         return self.cursor.fetchone()
 
     # Get the isbn of a Title entity by its id
@@ -149,8 +149,8 @@ class SQLiteModel(object):
         return self.cursor.fetchall()
 
     # Get the title of the subject by its FachwerkID
-    def getSubjectName(self, titel_id: int):
-        self.cursor.execute(f"SELECT Fachbereichsname FROM FACHBEREICH WHERE FachbereichsID = {titel_id};")
+    def getSubjectName(self, subjectID: int):
+        self.cursor.execute(f"SELECT Fachbereichsname FROM FACHBEREICH WHERE FachbereichsID = {subjectID};")
         return self.cursor.fetchone()
 
     def getStudentIDs(self):
@@ -172,6 +172,14 @@ class SQLiteModel(object):
     def getBookIDs(self):  # -> list(int)
         self.cursor.execute("SELECT ExemplarID FROM EXEMPLAR;")
         return self.cursor.fetchall()
+
+    def getBookTitleID(self, bookID):
+        self.cursor.execute(f"SELECT TitelID FROM EXEMPLAR WHERE ExemplarID = {bookID};")
+        return self.cursor.fetchone()
+
+    def getBookStudentID(self, bookID):
+        self.cursor.execute(f"SELECT BenutzerID FROM AUSLEIHE WHERE ExemplarID = {bookID};")
+        return self.cursor.fetchone()
 
     def isBookBorrowed(self, exemplar_id: int):  # -> bool
         self.cursor.execute(f"SELECT ExemplarID FROM AUSLEIHE WHERE ExemplarID = {exemplar_id};")
