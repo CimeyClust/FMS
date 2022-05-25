@@ -57,7 +57,7 @@ class MainView(View, customtkinter.CTk):
         QRIcon = PhotoImage(file=f"{os.getcwd()}\View\images\qriconsmall.png")
         Bild1 = PhotoImage(file=f"{os.getcwd()}\View\images\logo.png")
         # QRIcon=PhotoImage(file="images/qriconsmall.png")
-        self.protocol("WM_DELETE_WINDOW", self.on_closing)  # call .on_closing() when app gets closed
+        # self.protocol("WM_DELETE_WINDOW", self.on_closing)  # call .on_closing() when app gets closed
 
         # ============ create two frames ============
 
@@ -262,14 +262,9 @@ class MainView(View, customtkinter.CTk):
                             background=[('pressed', '!focus', "#9a9b9c"), ('active', "#bdbebf"), ('disabled', "#383838")])
             style.configure("Treeview.Heading", background="white", foreground="black")
 
-
-    def on_closing(self, event=0):
-        self.destroy()
-
-
     def start(self):
         self.mainloop()
 
     # Hide the current view and disable it
     def killView(self):
-        print("Test")
+        pass

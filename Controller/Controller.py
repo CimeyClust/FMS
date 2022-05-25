@@ -39,6 +39,7 @@ class Controller:
     def loadSubjects(self):
         with SQLiteModel() as db:
             for subjectID in db.getSubjectIDs():
+                print("Subject: " + str(subjectID))
                 Subject.Subject(
                     subjectID[0],
                     db.getSubjectName(subjectID[0])[0]
