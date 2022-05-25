@@ -30,9 +30,12 @@ class View:
 customtkinter.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
 customtkinter.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
 
+
 class MainView(View, customtkinter.CTk):
+
     WIDTH = 1200
     HEIGHT = 600
+
     def initView(self, control: Controller, values: list):
         '''
         Values:
