@@ -54,6 +54,9 @@ class MainView(View, customtkinter.CTk):
         global style
         super().__init__()
 
+
+
+        self.trigger1 = False
         self.title("Fachwerk Management System")
         self.geometry(f"{MainView.WIDTH}x{MainView.HEIGHT}")
         # self.minsize(App.WIDTH, App.HEIGHT)
@@ -86,27 +89,6 @@ class MainView(View, customtkinter.CTk):
 
         self.label_1 = customtkinter.CTkLabel(master=self.frame_left, image=Bild1)  # font name and size in px
         self.label_1.grid(row=1, column=0, pady=10, padx=10)
-
-        self.button_1 = customtkinter.CTkButton(master=self.frame_left,
-                                                text="CTkButton 1",
-                                                fg_color=("gray75", "gray30"),  # <- custom tuple-color
-                                                command=self.button_event)
-        self.button_1.grid(row=2, column=0, pady=10, padx=20)
-
-        self.button_2 = customtkinter.CTkButton(master=self.frame_left,
-                                                text="CTkButton 2",
-                                                fg_color=("gray75", "gray30"),  # <- custom tuple-color
-                                                command=self.button_event)
-        self.button_2.grid(row=3, column=0, pady=10, padx=20)
-
-        self.button_3 = customtkinter.CTkButton(master=self.frame_left,
-                                                text="CTkButton 3",
-                                                fg_color=("gray75", "gray30"),  # <- custom tuple-color
-                                                command=self.button_event)
-        self.button_3.grid(row=4, column=0, pady=10, padx=20)
-
-        self.switch_1 = customtkinter.CTkSwitch(master=self.frame_left)
-        self.switch_1.grid(row=9, column=0, pady=10, padx=20, sticky="w")
 
         self.switch_2 = customtkinter.CTkSwitch(master=self.frame_left,
                                                 text="Dark Mode",
@@ -143,11 +125,11 @@ class MainView(View, customtkinter.CTk):
         trv.column("#2", anchor="center", stretch="yes", width=1)
         trv.column("#3", anchor="center", stretch="yes", width=1)
         trv.column("#4", anchor="center", stretch="yes", width=1)
-        trv.heading("#0", text="adad")
-        trv.heading("#1", text="dadada")
-        trv.heading("#2", text="fafafaf")
-        trv.heading("#3", text="fafaf")
-        trv.heading("#4", text="fafafaf")
+        trv.heading("#0", text="Titel")
+        trv.heading("#1", text="ISBN")
+        trv.heading("#2", text="Autor")
+        trv.heading("#3", text="Fach")
+        trv.heading("#4", text="Schüler")
 
         table_scroll = tkinter.Scrollbar(master=self.frame_info, orient='vertical', command=trv.yview)
         table_scroll.grid(row=0, column=1, sticky='ns')
@@ -169,23 +151,23 @@ class MainView(View, customtkinter.CTk):
         self.radio_var = tkinter.IntVar(value=0)
 
         self.label_radio_group = customtkinter.CTkLabel(master=self.frame_right,
-                                                        text="CTkRadioButton Group:")
+                                                        text="Anzeigen:")
         self.label_radio_group.grid(row=0, column=2, columnspan=1, pady=20, padx=10, sticky="")
 
         self.radio_button_1 = customtkinter.CTkRadioButton(master=self.frame_right,
                                                            variable=self.radio_var,
-                                                           value=0)
-        self.radio_button_1.grid(row=1, column=2, pady=10, padx=20, sticky="n")
+                                                           value=0, text="Alle", command=partial(control.handleCallback, (Callback.SELECTION, (self.radio_var))))
+        self.radio_button_1.grid(row=1, column=2, pady=10, padx=20, sticky="nw")
 
         self.radio_button_2 = customtkinter.CTkRadioButton(master=self.frame_right,
                                                            variable=self.radio_var,
-                                                           value=1)
-        self.radio_button_2.grid(row=2, column=2, pady=10, padx=20, sticky="n")
+                                                           value=1, text="Verfügbare", command=partial(control.handleCallback, (Callback.SELECTION, (self.radio_var))))
+        self.radio_button_2.grid(row=2, column=2, pady=10, padx=20, sticky="nw")
 
         self.radio_button_3 = customtkinter.CTkRadioButton(master=self.frame_right,
                                                            variable=self.radio_var,
-                                                           value=2)
-        self.radio_button_3.grid(row=3, column=2, pady=10, padx=20, sticky="n")
+                                                           value=2, text="Ausgeliehene", command=partial(control.handleCallback, (Callback.SELECTION, (self.radio_var))))
+        self.radio_button_3.grid(row=3, column=2, pady=10, padx=20, sticky="nw")
 
         # self.slider_1 = customtkinter.CTkSlider(master=self.frame_right,
         #                                        from_=0,
@@ -199,22 +181,24 @@ class MainView(View, customtkinter.CTk):
         # self.slider_2.grid(row=5, column=0, columnspan=2, pady=10, padx=20, sticky="we")
 
         self.slider_button_1 = customtkinter.CTkButton(master=self.frame_right,
-                                                       height=25,
-                                                       text="CTkButton",
-                                                       command=self.button_event)
+                                                       text="Erstellen",
+                                                       command=self.create)
         self.slider_button_1.grid(row=4, column=2, columnspan=1, pady=10, padx=20, sticky="we")
 
         self.slider_button_2 = customtkinter.CTkButton(master=self.frame_right,
-                                                       height=25,
-                                                       text="CTkButton",
-                                                       command=self.button_event)
+                                                       text="Bearbeiten",
+                                                       command=self.edit)
         self.slider_button_2.grid(row=5, column=2, columnspan=1, pady=10, padx=20, sticky="we")
 
-        self.checkbox_button_1 = customtkinter.CTkButton(master=self.frame_right, height=25, text="QR-Code erstellen",
-                                                         image=QRIcon, command=self.button_event, fg_color="#38FF88",
+        self.checkbox_button_1 = customtkinter.CTkButton(master=self.frame_right, text="QR-Code erstellen",
+                                                         image=QRIcon, command=self.button_event,
                                                          text_color="Black")
         self.checkbox_button_1.grid(row=6, column=2, columnspan=1, pady=10, padx=20, sticky="we")
-
+        
+        self.checkbox_button_2 = customtkinter.CTkButton(master=self.frame_right, text="Ausleihen / Zurückgeben", command=self.button_event, fg_color="#38FF88",
+                                                         text_color="Black")
+        self.checkbox_button_2.grid(row=6, column=0, columnspan=2, pady=10, padx=20, sticky="we")
+        '''
         self.check_box_1 = customtkinter.CTkCheckBox(master=self.frame_right,
                                                      text="nur ausgeliehene")
         self.check_box_1.grid(row=6, column=0, pady=10, padx=20, sticky="w")
@@ -222,15 +206,15 @@ class MainView(View, customtkinter.CTk):
         self.check_box_2 = customtkinter.CTkCheckBox(master=self.frame_right,
                                                      text="nur abgelaufene")
         self.check_box_2.grid(row=6, column=1, pady=10, padx=20, sticky="w")
-
+        '''
         self.entry = customtkinter.CTkEntry(master=self.frame_right,
                                             width=120,
                                             placeholder_text="Suche")
-        self.entry.grid(row=8, column=0, columnspan=2, pady=20, padx=20, sticky="we")
+        self.entry.grid(row=11, column=0, columnspan=2, pady=25, padx=20, sticky="we")
 
-        self.button_5 = customtkinter.CTkButton(master=self.frame_right, text="QR-Code scannen", image=QRIcon,
-                                                compound="left", command=self.button_event)
-        self.button_5.grid(row=8, column=2, columnspan=1, pady=20, padx=20, sticky="we")
+        self.button_5 = customtkinter.CTkButton(master=self.frame_right, text="Suchen",
+                                                compound="left", command=partial(control.handleCallback, (Callback.SEARCH, (self.entry.get()))))
+        self.button_5.grid(row=11, column=2, columnspan=1, pady=25, padx=20, sticky="we")
 
         # set default values
         self.radio_button_1.select()
@@ -241,7 +225,7 @@ class MainView(View, customtkinter.CTk):
         # self.slider_button_1.configure(state=tkinter.DISABLED, text="Disabled Button")
         # self.radio_button_3.configure(state=tkinter.DISABLED)
         # self.check_box_1.configure(state=tkinter.DISABLED, text="CheckBox disabled")
-        self.check_box_2.select()
+        # self.check_box_2.select()
 
         self.start()
 
@@ -267,6 +251,39 @@ class MainView(View, customtkinter.CTk):
 
     def start(self):
         self.mainloop()
+
+
+    def edit(self):
+        if self.trigger1: return
+        self.trigger1=True
+        self.editwindow=customtkinter.CTk()
+        self.editwindow.title('Fachwerk Managment System')
+        self.editwindow.geometry('1000x563')
+        self.editwindow.resizable(0,0)
+        self.editwindow.configure(bg='Black')
+        Label(self.editwindow, text='ERFOLGREICH', background='black', foreground='white', font='Corbel 40 ',).place(x=0, y=0, relwidth=1, relheight=1)
+        self.editwindow.protocol("WM_DELETE_WINDOW", self.on_closing)
+        self.editwindow.mainloop()
+    
+    def on_closing(self, event=0):
+        self.trigger1=False
+        self.editwindow.destroy()
+
+    def create(self):
+        if self.trigger1: return
+        self.trigger1=True
+        self.editwindow=customtkinter.CTk()
+        self.editwindow.title('Fachwerk Managment System')
+        self.editwindow.geometry('1000x20')
+        self.editwindow.resizable(0,0)
+        self.editwindow.configure(bg='Black')
+        Label(self.editwindow, text='ERFOLGREICH Leon hacked mein pc', background='black', foreground='white', font='Corbel 40 ',).place(x=0, y=0, relwidth=1, relheight=1)
+        self.editwindow.protocol("WM_DELETE_WINDOW", self.on_closing)
+        self.editwindow.mainloop()
+    
+    def on_closing(self, event=0):
+        self.trigger1=False
+        self.editwindow.destroy()
 
     # Hide the current view and disable it
     def killView(self):
