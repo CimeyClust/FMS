@@ -252,7 +252,6 @@ class MainView(View, customtkinter.CTk):
     def start(self):
         self.mainloop()
 
-
     def edit(self):
         if self.trigger1: return
         self.trigger1=True
