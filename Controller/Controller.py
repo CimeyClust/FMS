@@ -6,7 +6,6 @@ from Controller.ViewRegister import ViewRegister
 from Model import Book, Subject, Student
 from Model.SQLiteModel import SQLiteModel
 from Model import Title
-from View.Views import View, MainView
 
 
 class Controller:
@@ -31,7 +30,8 @@ class Controller:
 
         # Use self.viewHandler.initiateView() to set a new view and kill the old one
         # Set Main windows on startup
-        self.viewHandler = ViewHandler(ViewRegister.MAIN_VIEW.value, self, self.getBooks())
+        self.mainView = ViewRegister.MAIN_VIEW.value
+        self.viewHandler = ViewHandler(self.mainView, self, (self.getBooks(), self.getAllSubjectNames()))
 
     """
     Loads every subject into it's own initiation of the Subject-Class
@@ -114,23 +114,42 @@ class Controller:
                     borrowedBooks.append(book)
         return borrowedBooks
 
+    def getAllSubjectNames(self):
+        subjectNames = []
+        for subject in Subject.subjects:
+            subjectNames.append(subject.subjectTitle)
+
+        return subjectNames
+
     """
     Handles the callbacks of the view
     """
-    def handleCallback(self, callbackType: Callback, values: tuple):
-        if callbackType == Callback.ADD_TITLE_BUTTON:
-            pass
-        elif callbackType == Callback.ADD_BOOKS_BUTTON:
-            pass
-        elif callbackType == Callback.CREATE_QR_CODE_BUTTON:
-            pass
+    def handleCallback(self, callbackType: Callback, *values):
+        if callbackType == Callback.ADD_SUBJECT:
+            with SQLiteModel() as db:
+                db.insertFachbereich(values[0].get())
+            Subject.Subject(5, values[0].get())
+            values[0].delete(0, 'end')
+
+        elif callbackType == Callback.DELETE_SUBJECT:
+            with SQLiteModel() as db:
+                db.deleteRow("FACHBEREICH", Subject.getSubjectByName(values[0]))
+                Subject.subjects.remove(Subject.getSubjectByName(values[0]))
+
+        elif callbackType == Callback.RELOAD_TABLE:
+            if values[0] == "all":
+                self.mainView.reloadTable(self.getBooks())
+            elif values[0] == "available":
+                self.mainView.reloadTable(self.getBooks(False))
+            elif values[0] == "unavailable":
+                self.mainView.reloadTable(self.getBooks(True))
 
 
     def createTestDatabaseInput(self):
         with SQLiteModel() as db:
-            db.insertBenutzer("Yassin", "Starzetz", 1011)
-            db.insertBenutzer("Luis", "Hamann", 1011)
-            db.insertBenutzer("Leon", "Martin", 1011)
+            db.insertSchueler("Yassin", "Starzetz", 1011)
+            db.insertSchueler("Luis", "Hamann", 1011)
+            db.insertSchueler("Leon", "Martin", 1011)
             db.insertFachbereich("Mathe")
             db.insertFachbereich("Englisch")
             db.insertTitel(1, "Math - the Book", "Dr. Bum", "1154848942134")
@@ -141,7 +160,7 @@ class Controller:
             db.insertExemplar(2, "Flasche ausgeschüttet")
             db.insertExemplar(3, "wurde aus Versehen verbrannt")
             db.insertExemplar(3, "wurde reingemalt")
-            db.insertAusleihe(1, 1, datetime.date.today(), datetime.date.today())
-            db.insertAusleihe(2, 3, datetime.date.today(), datetime.date.today())
-            db.insertAusleihe(3, 4, datetime.date.today(), datetime.date.today())
-            # db.dumpTable(['BENUTZER', 'AUSLEIHE', 'EXEMPLAR', 'TITEL', 'FACHWERK'])
+            db.insertAusleihe(1, 1, datetime.date.today(), datetime.date(2022, 7, 6))
+            db.insertAusleihe(2, 3, datetime.date.today(), datetime.date(2022, 7, 6))
+            db.insertAusleihe(3, 4, datetime.date.today(), datetime.date(2022, 7, 6))
+            # db.dumpTable(['SCHÜLER', 'AUSLEIHE', 'EXEMPLAR', 'TITEL', 'FACHWERK'])
