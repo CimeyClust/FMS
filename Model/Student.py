@@ -2,11 +2,11 @@ students = []
 
 
 class Student:
-    def __init__(self, id: int, name: str, surname: str, school_class: str):
+    def __init__(self, id: int, name: str, surname: str, schoolClass: str):
         self.id = id
         self.name = name
         self.surname = surname
-        self.school_class = school_class
+        self.schoolClass = schoolClass
 
         students.append(self)
 

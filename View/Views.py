@@ -50,9 +50,8 @@ class MainView(View, customtkinter.CTk):
         student: value[0].student.name + " " + value.student.surName
 
         fachbreichsnamen: value[1]
-        
         Callbacks:
-        
+
         '''
 
         global QRIcon
@@ -144,7 +143,7 @@ class MainView(View, customtkinter.CTk):
         self.trv.column("#3", anchor="center", stretch="yes", width=1)
         self.trv.column("#4", anchor="center", stretch="yes", width=1)
         self.trv.column("#5", anchor="center", stretch="yes", width=1)
-        
+
         self.trv.heading("#0", text="Buch-ID")
         self.trv.heading("#1", text="Titel")
         self.trv.heading("#2", text="ISBN")
@@ -163,7 +162,7 @@ class MainView(View, customtkinter.CTk):
             self.trv.insert(parent='', index='end', iid=book.id, text=book.id,
                        values=(book.title.title, book.title.isbn, book.title.author, book.title.subject.subjectTitle, student))
             # command=partial(control.handleCallback, (Callback.ADD_BOOKS_BUTTON, book.id))
-    	
+
         self.trv.bind('<<TreeviewSelect>>', self.activate)
         self.trv.bind("<Double-1>", self.editdouble)
         # self.progressbar = customtkinter.CTkProgressBar(master=self.frame_info)
@@ -216,7 +215,7 @@ class MainView(View, customtkinter.CTk):
 
         self.checkbox_button_1 = customtkinter.CTkButton(master=self.frame_right, text="QR-Code erstellen", image=QRIcon, command=self.button_event, text_color="Black", fg_color=("gray75", "White"), hover_color="#9c9a9a")
         self.checkbox_button_1.grid(row=6, column=2, columnspan=1, pady=10, padx=20, sticky="we")
-        
+
         self.checkbox_button_2 = customtkinter.CTkButton(master=self.frame_info, text="Ausleihen", command=self.button_event, fg_color="#737373", text_color="Black", state=tkinter.DISABLED)
         self.checkbox_button_2.grid(row=6, column=0, columnspan=2, pady=10, padx=10, sticky="we")
 
@@ -225,8 +224,7 @@ class MainView(View, customtkinter.CTk):
 
         self.button_5 = customtkinter.CTkButton(master=self.frame_right, text="Suchen", compound="left", text_color="Black", image=searchicon)
         self.button_5.grid(row=11, column=2, columnspan=1, pady=25, padx=20, sticky="we")
-        
-        
+
         ''', command=partial(control.handleCallback, (Callback.SEARCH, (self.entry.get())))'''
         # set default values
         self.radio_button_1.select()
@@ -274,7 +272,7 @@ class MainView(View, customtkinter.CTk):
             self.checkbox_button_2.configure(fg_color="#38FF88", hover_color="#30d973", state=tkinter.NORMAL, text="Ausleihen", command=self.leasing)
         else:
             self.checkbox_button_2.configure(fg_color="#ff5e5e", hover_color="#c94949", state=tkinter.NORMAL, text="Zurückgeben", command=self.button_event)
-   
+
     def editdouble(self, placeholder):
         self.edit()
 
@@ -291,7 +289,7 @@ class MainView(View, customtkinter.CTk):
             self.editwindow.resizable(0,0)
             self.frame_input = customtkinter.CTkFrame(master=self.editwindow)
             self.frame_input.grid(row=0, column=0, columnspan=4, rowspan=6, pady=20, padx=20, sticky="nsew")
-            
+
             self.subject=customtkinter.CTkLabel(master=self.frame_input, anchor=tkinter.W, justify=tkinter.LEFT, text="Fach:", text_font='Arial 13').grid(row=0, column=0, columnspan=1, pady=20, padx=5, sticky="w")
             self.selected_subject = tkinter.StringVar()
             self.subject_cb = ttk.Combobox(master=self.frame_input, textvariable=self.selected_subject)
@@ -303,15 +301,15 @@ class MainView(View, customtkinter.CTk):
             self.title=customtkinter.CTkLabel(master=self.frame_input,anchor=tkinter.W, justify=tkinter.LEFT, text="Titel:", text_font='Arial 13').grid(row=1, column=0, columnspan=1, pady=20, padx=0, sticky="w")
             self.titleentry = customtkinter.CTkEntry(master=self.frame_input, width=120)
             self.titleentry.grid(row=1, column=4, columnspan=3, pady=20, padx=20, sticky="nesw")
-            
+
             self.isbn=customtkinter.CTkLabel(master=self.frame_input, anchor=tkinter.W, justify=tkinter.LEFT, text="ISBN:", text_font='Arial 13').grid(row=2, column=0, columnspan=1, pady=20, padx=0, sticky="w")
             self.isbnentry = customtkinter.CTkEntry(master=self.frame_input, width=120)
             self.isbnentry.grid(row=2, column=4, columnspan=3, pady=20, padx=20, sticky="nesw")
-            
+
             self.autor=customtkinter.CTkLabel(master=self.frame_input, anchor=tkinter.W, justify=tkinter.LEFT, text="Autor:", text_font='Arial 13').grid(row=3, column=0, columnspan=1, pady=20, padx=0, sticky="w")
             self.autorentry = customtkinter.CTkEntry(master=self.frame_input, width=120)
             self.autorentry.grid(row=3, column=4, columnspan=3, pady=20, padx=20, sticky="nesw")
-            
+
             self.amount=customtkinter.CTkLabel(master=self.frame_input, anchor=tkinter.W, justify=tkinter.LEFT, text="Anzahl", text_font='Arial 13').grid(row=4, column=0, columnspan=1, pady=20, padx=0, sticky="w")
             self.amountentry = customtkinter.CTkEntry(master=self.frame_input, width=790)
             self.amountentry.grid(row=4, column=4, columnspan=3, pady=20, padx=20, sticky="nesw")
@@ -338,15 +336,15 @@ class MainView(View, customtkinter.CTk):
         self.editwindow.resizable(0,0)
         self.frame_input = customtkinter.CTkFrame(master=self.editwindow)
         self.frame_input.grid(row=0, column=0, columnspan=4, rowspan=6, pady=20, padx=20, sticky="nsew")
-        
+
         self.title=customtkinter.CTkLabel(master=self.frame_input,anchor=tkinter.W, justify=tkinter.LEFT, text="Vorname des Schülers:", text_font='Arial 13').grid(row=0, column=0, columnspan=1, pady=20, padx=0, sticky="w")
         self.titleentry = customtkinter.CTkEntry(master=self.frame_input, width=120)
         self.titleentry.grid(row=0, column=4, columnspan=3, pady=20, padx=20, sticky="nesw")
-        
+
         self.isbn=customtkinter.CTkLabel(master=self.frame_input, anchor=tkinter.W, justify=tkinter.LEFT, text="Nachname des Schülers:", text_font='Arial 13').grid(row=1, column=0, columnspan=1, pady=20, padx=0, sticky="w")
         self.isbnentry = customtkinter.CTkEntry(master=self.frame_input, width=500)
         self.isbnentry.grid(row=1, column=4, columnspan=3, pady=20, padx=20, sticky="nesw")
-    
+        
         self.finish = customtkinter.CTkButton(self.editwindow, text="Fertig", fg_color="#38FF88", hover_color="#30d973", text_color="Black").grid(row=7, column=2, columnspan=1, pady=10, padx=20, sticky="nesw")
         self.stop = customtkinter.CTkButton(self.editwindow, text="Abbrechen",fg_color="#ff5e5e", hover_color="#c94949", text_color="Black", command=self.on_closing).grid(row=7, column=1, columnspan=1, pady=10, padx=20, sticky="nesw")
         self.editwindow.protocol("WM_DELETE_WINDOW", self.on_closing)
@@ -359,10 +357,10 @@ class MainView(View, customtkinter.CTk):
         self.editwindow.title('Fachwerk Managment System')
         self.editwindow.geometry('1000x520')
         self.editwindow.resizable(0,0)
-       
+
         self.frame_input = customtkinter.CTkFrame(master=self.editwindow)
         self.frame_input.grid(row=0, column=0, columnspan=4, rowspan=7, pady=20, padx=20, sticky="nsew")
-        
+
         self.createsubjectbutton = customtkinter.CTkButton(master=self.frame_input, text="Fachbereich erstellen/löschen", text_color="Black", width=30, command=self.createsubject).grid(row=0, column=10, columnspan=1, pady=20, padx=40, sticky="nesw")
         self.titleheading=customtkinter.CTkLabel(master=self.frame_input,anchor=tkinter.W, justify=tkinter.LEFT, text="Titel erstellen:", text_font='Arial 17').grid(row=0, column=0, columnspan=2, pady=20, padx=20, sticky="w")
 
@@ -377,15 +375,15 @@ class MainView(View, customtkinter.CTk):
         self.title=customtkinter.CTkLabel(master=self.frame_input,anchor=tkinter.W, justify=tkinter.LEFT, text="Titel:", text_font='Arial 13').grid(row=2, column=0, columnspan=1, pady=20, padx=0, sticky="w")
         self.titleentry = customtkinter.CTkEntry(master=self.frame_input, width=120)
         self.titleentry.grid(row=2, column=1, columnspan=10, pady=20, padx=20, sticky="nesw")
-        
+
         self.isbn=customtkinter.CTkLabel(master=self.frame_input, anchor=tkinter.W, justify=tkinter.LEFT, text="ISBN:", text_font='Arial 13').grid(row=3, column=0, columnspan=1, pady=20, padx=0, sticky="w")
         self.isbnentry = customtkinter.CTkEntry(master=self.frame_input, width=120)
         self.isbnentry.grid(row=3, column=1, columnspan=10, pady=20, padx=20, sticky="nesw")
-        
+
         self.autor=customtkinter.CTkLabel(master=self.frame_input, anchor=tkinter.W, justify=tkinter.LEFT, text="Autor:", text_font='Arial 13').grid(row=4, column=0, columnspan=1, pady=20, padx=0, sticky="w")
         self.autorentry = customtkinter.CTkEntry(master=self.frame_input, width=120)
         self.autorentry.grid(row=4, column=1, columnspan=10, pady=20, padx=20, sticky="nesw")
-        
+
         self.amount=customtkinter.CTkLabel(master=self.frame_input, anchor=tkinter.W, justify=tkinter.LEFT, text="Anzahl", text_font='Arial 13').grid(row=5, column=0, columnspan=1, pady=20, padx=0, sticky="w")
         self.amountentry = customtkinter.CTkEntry(master=self.frame_input, width=790)
         self.amountentry.grid(row=5, column=1, columnspan=10, pady=20, padx=20, sticky="nesw")
@@ -414,6 +412,49 @@ class MainView(View, customtkinter.CTk):
         self.titleentry.grid(row=1, column=0, columnspan=3, pady=10, padx=(30, 10), sticky="nesw")
         self.createbut = customtkinter.CTkButton(master=self.frame_input1, text="Fachbereich erstellen", text_color="Black", width=10, command=lambda: self.control.handleCallback(Callback.ADD_SUBJECT, self.titleentry)).grid(row=1, column=4, columnspan=1, pady=10, padx=(10, 30), sticky="nesw")
         
+        self.deletetitle=customtkinter.CTkLabel(master=self.frame_input1, anchor=tkinter.W, justify=tkinter.LEFT, text="Löschen:", text_font='Arial 13').grid(row=2, column=0, columnspan=1, pady=10, padx=10, sticky="w")
+        self.selected_subject1 = tkinter.StringVar()
+        self.subject_cb1 = ttk.Combobox(master=self.frame_input1, textvariable=self.selected_subject)
+        self.subject_cb1.grid(row=3, column=0, columnspan=3, pady=(10, 20), padx=(30, 10), sticky="nesw")
+        self.subject_cb1['state'] = 'readonly'
+        self.subject_cb1['values'] = self.values[1]
+        self.createbut = customtkinter.CTkButton(master=self.frame_input1, text="Fachbereich löschen", text_color="Black", command=lambda: self.control.handleCallback(Callback.DELETE_SUBJECT, self.selected_subject1)).grid(row=3, column=4, columnspan=1, pady=(10, 20), padx=(10, 30), sticky="nesw")
+
+        self.finish = customtkinter.CTkButton(self.subjectwindow, text="Fertig", fg_color="#38FF88", hover_color="#30d973", text_color="Black", command=self.on_closing2).grid(row=7, column=1, columnspan=2, pady=10, padx=20, sticky="nesw")
+
+        self.subjectwindow.protocol("WM_DELETE_WINDOW", self.on_closing2)
+        self.subjectwindow.mainloop()
+
+    def reloadTable(self, books):
+        for row in self.trv.get_children():
+            self.trv.delete(row)
+
+        for book, index in zip(books, range(0, len(books) - 1)):
+            student = ""
+            if book.student is not None:
+                student = book.student.name + " " + book.student.surname
+            self.trv.insert(parent='', index='end', iid=book.id, text=book.id,
+                            values=(book.title.title, book.title.isbn, book.title.author, book.title.subject.subjectTitle, student))
+
+
+    def createsubject(self):
+        if self.trigger2: return
+        curItemID = self.trv.focus()
+        curItem = self.trv.item(curItemID)
+        curDict = curItem.get("values")
+        self.trigger2=True
+        self.subjectwindow=customtkinter.CTk()
+        self.subjectwindow.title('Fachbereich erstellen/löschen')
+        self.subjectwindow.geometry('1000x315')
+        self.subjectwindow.resizable(0,0)
+        self.frame_input1 = customtkinter.CTkFrame(master=self.subjectwindow)
+        self.frame_input1.grid(row=0, column=0, columnspan=4, rowspan=6, pady=20, padx=20, sticky="nsew")
+
+        self.createtitle=customtkinter.CTkLabel(master=self.frame_input1, anchor=tkinter.W, justify=tkinter.LEFT, text="Erstellen:", text_font='Arial 13').grid(row=0, column=0, columnspan=1, pady=(20, 10), padx=(10, 10), sticky="w")
+        self.titleentry = customtkinter.CTkEntry(master=self.frame_input1, width=735)
+        self.titleentry.grid(row=1, column=0, columnspan=3, pady=10, padx=(30, 10), sticky="nesw")
+        self.createbut = customtkinter.CTkButton(master=self.frame_input1, text="Fachbereich erstellen", text_color="Black", width=10, command=lambda: self.control.handleCallback(Callback.ADD_SUBJECT, self.titleentry)).grid(row=1, column=4, columnspan=1, pady=10, padx=(10, 30), sticky="nesw")
+
         self.deletetitle=customtkinter.CTkLabel(master=self.frame_input1, anchor=tkinter.W, justify=tkinter.LEFT, text="Löschen:", text_font='Arial 13').grid(row=2, column=0, columnspan=1, pady=10, padx=10, sticky="w")
         self.selected_subject1 = tkinter.StringVar()
         self.subject_cb1 = ttk.Combobox(master=self.frame_input1, textvariable=self.selected_subject)
