@@ -141,7 +141,7 @@ class MainView(View, customtkinter.CTk):
         for book, index in zip(values, range(0, len(values) - 1)):
             student = "---------------"
             if book.student is not None:
-                student = book.student.surName + " " + book.student.lastName
+                student = book.student.name + " " + book.student.surname
             self.trv.insert(parent='', index='end', iid=book.id, text=book.id,
                        values=(book.title.title, book.title.isbn, book.title.author, book.title.subject.subjectTitle, student))
             # command=partial(control.handleCallback, (Callback.ADD_BOOKS_BUTTON, book.id))
