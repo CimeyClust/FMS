@@ -189,6 +189,10 @@ class SQLiteModel(object):
         self.cursor.execute("SELECT BenutzerID FROM BENUTZER;")
         return self.cursor.fetchall()
 
+    def getStudentID(self, vorname: str, nachname: str, klasse: int):
+        self.cursor.execute(f"SELECT BenutzerID FROM BENUTZER WHERE Vorname = {vorname} AND Nachname = {nachname} AND Klasse = {klasse};")
+        return self.cursor.fetchone()
+
     def getStudentSurName(self, benutzer_id: int):  # -> str
         self.cursor.execute(f"SELECT Vorname FROM BENUTZER WHERE BenutzerID = {benutzer_id};")
         return self.cursor.fetchone()
@@ -246,30 +250,49 @@ class SQLiteModel(object):
             "INSERT INTO BENUTZER (Vorname, Nachname, Klasse) "
             "VALUES (?, ?, ?);", (vorname, nachname, klasse)
         )
+        self.cursor.execute(
+            f"SELECT BenutzerID FROM BENUTZER WHERE Vorname = {vorname} AND Nachname = {nachname} AND Klasse = {klasse};")
+        return self.cursor.fetchone()
 
     def insertAusleihe(self, benutzer_id: int, exemplar_id: int, datum_entleihe: datetime, datum_rueckgabe: datetime):
         self.cursor.execute(
             "INSERT INTO AUSLEIHE (SchülerID, ExemplarID, DatumEntleihe, DatumRückgabe) "
             "VALUES (?, ?, ?, ?);", (benutzer_id, exemplar_id, datum_entleihe, datum_rueckgabe)
         )
+        self.cursor.execute(
+            f"SELECT VorgangsID FROM AUSLEIHE WHERE SchülerID = {benutzer_id} AND ExemplarID = {exemplar_id} AND DatumEntleihe = {datum_entleihe} AND DatumRückgabe = {datum_rueckgabe}  ")
+        return self.cursor.fetchone()
+
 
     def insertExemplar(self, titel_id: int, bemerkung: str):
         self.cursor.execute(
             "INSERT INTO EXEMPLAR (TitelID, Bemerkung) "
             "VALUES (?, ?);", (titel_id, bemerkung)
         )
+        self.cursor.execute(
+            f"SELECT ExemplarID FROM EXEMPLAR WHERE TitelID = {titel_id} AND Bemerkung = {bemerkung}")
+        return self.cursor.fetchone()
 
     def insertTitel(self, fachbereichs_id: int, titelname: str, autor: str, isbn: str):
         self.cursor.execute(
             "INSERT INTO TITEL (FachbereichsID, Titelname, Autor, ISBN) "
             "VALUES (?, ?, ?, ?);", (fachbereichs_id, titelname, autor, isbn)
         )
+        self.cursor.execute(
+            f"SELECT TitelID FROM TITEL WHERE FachbereichsID = {fachbereichs_id} AND Titelname = {titelname} AnD Autor = {autor} AND ISBN = {isbn} "
+        )
+        return self.cursor.fetchone()
 
     def insertFachbereich(self, fachbereichsname: str):
         self.cursor.execute(
             "INSERT INTO FACHBEREICH (Fachbereichsname) "
             "VALUES (?);", (fachbereichsname, )
         )
+        self.cursor.execute(
+            f"SELECT FachbereichsID FROM FACHBEREICH WHERE Fachbereichsname = {fachbereichsname}"
+        )
+        return self.cursor.fetchone()
+
 
     # UPDATE
 
