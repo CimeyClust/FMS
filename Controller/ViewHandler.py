@@ -4,12 +4,12 @@ from View.Views import View
 
 
 class ViewHandler:
-    def __init__(self, startView: View, control: Controller, values: list):
+    def __init__(self, startView: View, control: Controller, values: tuple):
         self.currentView = startView
 
         self.initiateView(startView, control, values)
 
-    def initiateView(self, view: View, control: Controller, values: list):
+    def initiateView(self, view: View, control: Controller, values: tuple):
         # Kill old view
         self.currentView.killView()
 
@@ -18,4 +18,5 @@ class ViewHandler:
 
         print(str(view))
         self.currentView.initView(control, values)
+        self.currentView.mainloop()
 
