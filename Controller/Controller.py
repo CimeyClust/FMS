@@ -29,7 +29,7 @@ class Controller:
         # Use self.callbackHandler.initiateView() to set a new view and kill the old one
 
         # Cancel the init of the view, when the code gets tested:
-        if len(args) >= 1 and "testing" in args:
+        if len(args) >= 1 and args[1] == "testing":
             return
 
         # Use self.viewHandler.initiateView() to set a new view and kill the old one
