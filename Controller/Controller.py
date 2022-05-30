@@ -128,7 +128,6 @@ class Controller:
         if callbackType == Callback.ADD_SUBJECT:
             with SQLiteModel() as db:
                 subjectID = db.insertFachbereich(values[0].get())
-                print(int(subjectID[0]))
                 print(Subject.Subject(int(subjectID[0]), values[0].get()).subjectTitle)
             values[0].delete(0, 'end')
 
