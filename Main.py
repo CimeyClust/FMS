@@ -1,3 +1,6 @@
+import matplotlib
+matplotlib.use('Agg')
+
 from Controller.Controller import Controller
 
 if __name__ == "__main__":
