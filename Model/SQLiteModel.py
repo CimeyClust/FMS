@@ -64,7 +64,7 @@ class SQLiteModel(object):
                              ExemplarID INTEGER UNSIGNED NOT NULL,
                              DatumEntleihe DATE NULL DEFAULT NULL,
                              DatumRückgabe DATE NULL DEFAULT NULL,
-                             FOREIGN KEY (BenutzerID) REFERENCES `BENUTZER`(`BenutzerID`) ON DELETE CASCADE,
+                             FOREIGN KEY (SchülerID) REFERENCES `BENUTZER`(`SchülerID`) ON DELETE CASCADE,
                              FOREIGN KEY (ExemplarID) REFERENCES `EXEMPLAR`(`ExemplarID`) ON DELETE CASCADE
                          ); """
 
@@ -247,7 +247,7 @@ class SQLiteModel(object):
 
     def insertSchueler(self, vorname: str, nachname: str, klasse: int):
         self.cursor.execute(
-            "INSERT INTO BENUTZER (Vorname, Nachname, Klasse) "
+            "INSERT INTO SCHÜLER (Vorname, Nachname, Klasse) "
             "VALUES (?, ?, ?);", (vorname, nachname, klasse)
         )
         self.cursor.execute(
@@ -279,7 +279,8 @@ class SQLiteModel(object):
             "VALUES (?, ?, ?, ?);", (fachbereichs_id, titelname, autor, isbn)
         )
         self.cursor.execute(
-            f"SELECT TitelID FROM TITEL WHERE FachbereichsID = '{fachbereichs_id}' AND Titelname = '{titelname}' AND Autor = {autor} AND ISBN = '{isbn}'"
+
+            f"SELECT TitelID FROM TITEL WHERE FachbereichsID = '{fachbereichs_id}' AND Titelname = '{titelname}' AND Autor = '{autor}' AND ISBN = '{isbn}'"
         )
         return self.cursor.fetchone()
 
