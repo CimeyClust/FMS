@@ -3,6 +3,7 @@ from Model.Student import Student
 
 books = []
 
+
 class Book:
     def __init__(self, id: int, borrowed: bool, title: Title, student: Student = None):
         self.id = id
