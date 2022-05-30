@@ -6,4 +6,4 @@ from View.Views import MainView
 class ViewRegister(Enum):
     # Callback list:
     # ...
-    MAIN_VIEW = MainView()
+    MAIN_VIEW = MainView

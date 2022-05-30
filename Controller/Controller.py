@@ -6,10 +6,11 @@ from Controller.ViewRegister import ViewRegister
 from Model import Book, Subject, Student
 from Model.SQLiteModel import SQLiteModel
 from Model import Title
+import unittest
 
 
-class Controller:
-    def __init__(self):
+class Controller(unittest.TestCase):
+    def __init__(self, args):
         # Model
         self.model = SQLiteModel()
 
@@ -28,9 +29,13 @@ class Controller:
 
         # Use self.callbackHandler.initiateView() to set a new view and kill the old one
 
+        # Cancel the init of the view, when the code gets tested:
+        if len(args) >= 1 and "testing" in args:
+            return
+
         # Use self.viewHandler.initiateView() to set a new view and kill the old one
         # Set Main windows on startup
-        self.mainView = ViewRegister.MAIN_VIEW.value
+        self.mainView = ViewRegister.MAIN_VIEW.value()
         self.viewHandler = ViewHandler(self.mainView, self, (self.getBooks(), self.getAllSubjectNames()))
 
     """
@@ -128,7 +133,6 @@ class Controller:
         if callbackType == Callback.ADD_SUBJECT:
             with SQLiteModel() as db:
                 subjectID = db.insertFachbereich(values[0].get())
-                print(int(subjectID[0]))
                 print(Subject.Subject(int(subjectID[0]), values[0].get()).subjectTitle)
             values[0].delete(0, 'end')
 
