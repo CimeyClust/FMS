@@ -9,7 +9,7 @@ from Model import Title
 
 
 class Controller:
-    def __init__(self):
+    def __init__(self, args):
         # Model
         self.model = SQLiteModel()
 
@@ -27,6 +27,10 @@ class Controller:
         # A new view will be instantiated every time it switches
 
         # Use self.callbackHandler.initiateView() to set a new view and kill the old one
+
+        # Cancel the init of the view, when the code gets tested:
+        if len(args) >= 1 and "testing" in args:
+            return
 
         # Use self.viewHandler.initiateView() to set a new view and kill the old one
         # Set Main windows on startup
