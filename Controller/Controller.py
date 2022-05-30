@@ -6,9 +6,10 @@ from Controller.ViewRegister import ViewRegister
 from Model import Book, Subject, Student
 from Model.SQLiteModel import SQLiteModel
 from Model import Title
+import unittest
 
 
-class Controller:
+class Controller(unittest.TestCase):
     def __init__(self, args):
         # Model
         self.model = SQLiteModel()
