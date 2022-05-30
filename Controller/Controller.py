@@ -127,8 +127,9 @@ class Controller:
     def handleCallback(self, callbackType: Callback, *values):
         if callbackType == Callback.ADD_SUBJECT:
             with SQLiteModel() as db:
-                db.insertFachbereich(values[0].get())
-            Subject.Subject(5, values[0].get())
+                subjectID = db.insertFachbereich(values[0].get())
+                print(int(subjectID[0]))
+                print(Subject.Subject(int(subjectID[0]), values[0].get()).subjectTitle)
             values[0].delete(0, 'end')
 
         elif callbackType == Callback.DELETE_SUBJECT:
