@@ -1,6 +1,5 @@
 students = []
 
-
 class Student:
     def __init__(self, id: int, name: str, surname: str, schoolClass: str):
         self.id = id
