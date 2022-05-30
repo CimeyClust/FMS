@@ -1,23 +1,58 @@
-import os
+###########################################################################
+#
+# Model.py
+# Program made by Luis and Yassin for the FMS project.
+#
+###########################################################################
+
 import sqlite3 as sql
 import pandas as pd
 import datetime
+import os
 
+
+###########################################################################
+#
+#    The Database class of the FMS.
+#
+#    [what this class does]
+#
+###########################################################################
 
 class SQLiteModel(object):
+
+    #######################################################################
+    #
+    #  The constructor of the Database class.
+    #
+    #  Defines the connection and cursor of the database.
+    #  It calls the createTable() method which generates all tables if they
+    #  haven't already.
+    #
+    #  @see createTable()
+    #
+    #######################################################################
+
     def __init__(self):
-        # Define connection and cursor
         self.connection = sql.connect('fms.db')
         self.cursor = self.connection.cursor()
         self.createTable()
 
         # Local AppData Directory --> self.connection = sql.connect(f'{os.getenv("LOCALAPPDATA")}\\fms.db')
 
-    # Create the required tables for the program to work
+    #######################################################################
+    #
+    #  Function to create tables.
+    #
+    #  This function builds the necessary tables for the FMS in order to
+    #  work properly.
+    #
+    #######################################################################
+
     def createTable(self):
         # Creating SQL queries for the table generation
-        table_benutzer = """ CREATE TABLE IF NOT EXISTS BENUTZER (
-                             BenutzerID INTEGER PRIMARY KEY,
+        table_schueler = """ CREATE TABLE IF NOT EXISTS SCHÜLER (
+                             SchülerID INTEGER PRIMARY KEY,
                              Vorname VARCHAR(255) NOT NULL,
                              Nachname VARCHAR(255) NOT NULL,
                              Klasse INTEGER(4) NULL DEFAULT NULL
@@ -25,7 +60,7 @@ class SQLiteModel(object):
 
         table_ausleihe = """ CREATE TABLE IF NOT EXISTS AUSLEIHE (
                              VorgangsID INTEGER PRIMARY KEY,
-                             BenutzerID INTEGER UNSIGNED NOT NULL,
+                             SchülerID INTEGER UNSIGNED NOT NULL,
                              ExemplarID INTEGER UNSIGNED NOT NULL,
                              DatumEntleihe DATE NULL DEFAULT NULL,
                              DatumRückgabe DATE NULL DEFAULT NULL,
@@ -55,23 +90,34 @@ class SQLiteModel(object):
                             ); """
 
         # Execution of the SQL queries
-        self.cursor.execute(table_benutzer)
+        self.cursor.execute(table_schueler)
         self.cursor.execute(table_ausleihe)
         self.cursor.execute(table_exemplar)
         self.cursor.execute(table_titel)
         self.cursor.execute(table_fachbereich)
 
-    # Deletes the database
-    def dumpDatabase(self):
-        self.connection.close()
-        os.remove("fms.db")
+    #######################################################################
+    #
+    #  Function to delete one or multiple tables.
+    #
+    #  @param tables: A list containing strings with the name of a table.
+    #
+    #######################################################################
 
-    # Deletes all tables
     def dumpTable(self, tables: list):
         for table in tables:
             self.cursor.execute(f"DROP TABLE IF EXISTS {table}")
 
-    # Returns information about all tables in the database
+    #######################################################################
+    #
+    #  Function to return information about all tables in the database.
+    #
+    #  This function is only meant for debugging. It allows to view
+    #  all information about the database inside the console and is not
+    #  meant for any practise other than that.
+    #
+    #######################################################################
+
     def tableInfo(self):
         self.cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
         tables = self.cursor.fetchall()
@@ -80,43 +126,29 @@ class SQLiteModel(object):
             table = pd.read_sql_query(f"SELECT * from {table_name}", self.connection)
             print(table_name + "\n", table, "\n")
 
-    # Generell execute method for custom sql query
-    def execute(self, query):
-        self.cursor.execute(query)
+    #######################################################################
+    #
+    #  Function to query data from the database.
+    #
+    #  This is the main function to get data from the database.
+    #  It can either get all data or only the data from one or more columns
+    #  of a table.
+    #
+    #  @param table_name: The name of the database's table to query from.
+    #
+    #  @param column: A string of columns, comma-separated.
+    #
+    #######################################################################
 
-    # Get Method for Tables
     def getTable(self, table_name: str, column: str):
         self.cursor.execute(f"SELECT {column} FROM {table_name};")
         return self.cursor.fetchall()
 
-    # Insert methode for user
-    def insertBenutzer(self, name: str, surname: str, school_class: int):
-        self.cursor.execute(
-            "INSERT INTO BENUTZER (Vorname, Nachname, Klasse) "
-            "VALUES (?, ?, ?);", (name, surname, school_class)
-        )
-
-    def insertAusleihe(self, benutzer_id: int, exemplar_id: int, datum_entleihe: datetime, datum_rueckgabe: datetime):
-        self.cursor.execute(
-            "INSERT INTO AUSLEIHE (BenutzerID, ExemplarID, DatumEntleihe, DatumRückgabe) "
-            "VALUES (?, ?, ?, ?);", (benutzer_id, exemplar_id, datum_entleihe, datum_rueckgabe)
-        )
-
-    def insertExemplar(self, titel_id: int, bemerkung: str):
-        self.cursor.execute(
-            "INSERT INTO EXEMPLAR (TitelID, Bemerkung) "
-            "VALUES (?, ?);", (titel_id, bemerkung)
-        )
-
-    def insertTitel(self, fachbereichs_id: int, titelname: str, autor: str, isbn: str):
-        self.cursor.execute(
-            "INSERT INTO TITEL (FachbereichsID, Titelname, Autor, ISBN) "
-            "VALUES (?, ?, ?, ?);", (fachbereichs_id, titelname, autor, isbn)
-        )
-
-    def insertFachbereich(self, fachbereichsname: str):
-        self.cursor.execute("INSERT INTO FACHBEREICH (Fachbereichsname) "
-                            "VALUES (?);", (fachbereichsname, ))
+    #######################################################################
+    #
+    #  Functions to query specific data from the database.
+    #
+    #######################################################################
 
     # Get all IDs of the title entity
     def getTitleIDs(self):
@@ -188,13 +220,97 @@ class SQLiteModel(object):
 
         return True
 
-    # Context Manager
+    #######################################################################
+    #
+    #  Functions to insert new data into the database.
+    #
+    #  @method insertSchueler:
+    #  takes 3 parameters [Vorname, Nachname, Klasse]
+    #
+    #  @method insertAusleihe:
+    #  takes 4 parameters [BenutzerID, ExemplarID, DatumEntleihe, DatumRückgabe]
+    #
+    #  @method insertExemplar:
+    #  takes 2 parameters [TitelID, Bemerkung]
+    #
+    #  @method insertTitel:
+    #  takes 4 parameters [FachbereichsID, Titelname, Autor, ISBN]
+    #
+    #  @method insertFachbereich:
+    #  takes 1 parameter [Fachbereichsname]
+    #
+    #######################################################################
+
+    def insertSchueler(self, vorname: str, nachname: str, klasse: int):
+        self.cursor.execute(
+            "INSERT INTO BENUTZER (Vorname, Nachname, Klasse) "
+            "VALUES (?, ?, ?);", (vorname, nachname, klasse)
+        )
+
+    def insertAusleihe(self, benutzer_id: int, exemplar_id: int, datum_entleihe: datetime, datum_rueckgabe: datetime):
+        self.cursor.execute(
+            "INSERT INTO AUSLEIHE (SchülerID, ExemplarID, DatumEntleihe, DatumRückgabe) "
+            "VALUES (?, ?, ?, ?);", (benutzer_id, exemplar_id, datum_entleihe, datum_rueckgabe)
+        )
+
+    def insertExemplar(self, titel_id: int, bemerkung: str):
+        self.cursor.execute(
+            "INSERT INTO EXEMPLAR (TitelID, Bemerkung) "
+            "VALUES (?, ?);", (titel_id, bemerkung)
+        )
+
+    def insertTitel(self, fachbereichs_id: int, titelname: str, autor: str, isbn: str):
+        self.cursor.execute(
+            "INSERT INTO TITEL (FachbereichsID, Titelname, Autor, ISBN) "
+            "VALUES (?, ?, ?, ?);", (fachbereichs_id, titelname, autor, isbn)
+        )
+
+    def insertFachbereich(self, fachbereichsname: str):
+        self.cursor.execute(
+            "INSERT INTO FACHBEREICH (Fachbereichsname) "
+            "VALUES (?);", (fachbereichsname, )
+        )
+
+    # UPDATE
+
+    def update(self):
+        pass
+
+    # DELETE
+
+    def deleteRow(self, table_name: str, row_id: int):
+        self.cursor.execute(f"DELETE FROM {table_name} WHERE id = {row_id};")
+
+    #######################################################################
+    #
+    #  Function to query any other SQL statement.
+    #
+    #  This function is there in case it's wanted to execute any other sql
+    #  statement other than the given ones.
+    #
+    #  @param query: A valid SQL statement in string format.
+    #
+    #######################################################################
+
+    def executeQuery(self, query):
+        self.cursor.execute(query)
+
+    #######################################################################
+    #
+    #  Function to open and close a database connection.
+    #
+    #  By managing the database connection as a context manager, the Database
+    #  can be opened as a context method, using a 'with ... as' statement.
+    #
+    #######################################################################
+
     def __enter__(self):
         print("\nConnected to the database...\n")
         return self
 
     def __exit__(self, ext_type, exc_value, traceback):
         self.cursor.close()
+        # if an error occurs any changes to the database since the last call to commit() will get rolled back
         if isinstance(exc_value, Exception):
             self.connection.rollback()
         else:
@@ -204,11 +320,12 @@ class SQLiteModel(object):
 
 
 if __name__ == "__main__":
-    SQLiteModel().dumpDatabase()
+    os.remove("fms.db")
     with SQLiteModel() as db:
-        db.insertBenutzer("Yassin", "Starzetz", 1011)
-        db.insertBenutzer("Luis", "Hamann", 1011)
-        db.insertBenutzer("Leon", "Martin", 1011)
+
+        db.insertSchueler("Yassin", "Starzetz", 1011)
+        db.insertSchueler("Luis", "Hamann", 1011)
+        db.insertSchueler("Leon", "Martin", 1011)
         db.insertFachbereich("Mathe")
         db.insertFachbereich("Englisch")
         db.insertTitel(1, "Math - the Book", "Dr. Bum", "1154848942134")
@@ -219,10 +336,12 @@ if __name__ == "__main__":
         db.insertExemplar(2, "Flasche ausgeschüttet")
         db.insertExemplar(3, "wurde aus Versehen verbrannt")
         db.insertExemplar(3, "wurde reingemalt")
-        db.insertAusleihe(1, 1, datetime.date.today(), datetime.date.today())
-        db.insertAusleihe(2, 3, datetime.date.today(), datetime.date.today())
-        db.insertAusleihe(3, 4, datetime.date.today(), datetime.date.today())
+        db.insertAusleihe(1, 1, datetime.date.today(), datetime.date(2022, 7, 6))
+        db.insertAusleihe(2, 3, datetime.date.today(), datetime.date(2022, 7, 6))
+        db.insertAusleihe(3, 4, datetime.date.today(), datetime.date(2022, 7, 6))
+
         db.tableInfo()
-        print(db.getTable("BENUTZER", "*"))
-        print(db.getTable("BENUTZER", "Vorname, Nachname"))
-        db.dumpTable(['BENUTZER', 'AUSLEIHE', 'EXEMPLAR', 'TITEL', 'FACHWERK'])
+
+        print(db.getTable("SCHÜLER", "*"))
+        print(db.getTable("SCHÜLER", "Vorname, Nachname"))
+        db.dumpTable(['SCHÜLER', 'AUSLEIHE', 'EXEMPLAR', 'TITEL', 'FACHWERK'])
