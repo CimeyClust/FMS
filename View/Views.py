@@ -11,6 +11,7 @@ import os
 import asyncio
 from Controller import Controller
 from Controller.CallbackRegister import Callback
+import matplotlib
 
 global QRIcon
 global Bild1
@@ -33,6 +34,7 @@ class View:
 
 customtkinter.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
 customtkinter.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
+matplotlib.use('Agg')
 
 
 class MainView(View, customtkinter.CTk):
