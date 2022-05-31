@@ -16,7 +16,6 @@ class ViewHandler:
         # Set the new currentView
         self.currentView = view
 
-        print(str(view))
         self.currentView.initView(control, values)
         self.currentView.mainloop()
 

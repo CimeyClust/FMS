@@ -17,6 +17,6 @@ def getSubject(id: int):
 
 def getSubjectByName(name: str):
     for subject in subjects:
-        if subjects.id == id():
+        if subject.subjectTitle == name:
             return subject
     return None
