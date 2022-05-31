@@ -15,3 +15,14 @@ def getStudent(id: int):
         if student.id == id:
             return student
     return None
+
+def getStudentByAttributes(name: str, surname: str, group: str = None):
+    if group is None:
+        for student in students:
+            if student.name == name and student.surname == surname:
+                return student
+    else:
+        for student in students:
+            if student.name == name and student.surname == surname \
+                    and student.schoolClass == group:
+                return student

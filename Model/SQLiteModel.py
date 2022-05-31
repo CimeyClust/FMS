@@ -9,6 +9,7 @@ import sqlite3 as sql
 import pandas as pd
 import datetime
 import os
+import qrcode
 
 
 ###########################################################################
@@ -51,20 +52,19 @@ class SQLiteModel(object):
 
     def createTable(self):
         # Creating SQL queries for the table generation
-        table_schueler = """ CREATE TABLE IF NOT EXISTS SCHÜLER (
-                             SchülerID INTEGER PRIMARY KEY,
+        table_schueler = """ CREATE TABLE IF NOT EXISTS SCHUELER (
+                             SchuelerID INTEGER PRIMARY KEY,
                              Vorname VARCHAR(255) NOT NULL,
                              Nachname VARCHAR(255) NOT NULL,
-                             Klasse INTEGER(4) NULL DEFAULT NULL
+                             Klasse VARCHAR(255) NULL DEFAULT NULL
                          ); """
 
         table_ausleihe = """ CREATE TABLE IF NOT EXISTS AUSLEIHE (
                              VorgangsID INTEGER PRIMARY KEY,
-                             SchülerID INTEGER UNSIGNED NOT NULL,
+                             SchuelerID INTEGER UNSIGNED NOT NULL,
                              ExemplarID INTEGER UNSIGNED NOT NULL,
                              DatumEntleihe DATE NULL DEFAULT NULL,
-                             DatumRückgabe DATE NULL DEFAULT NULL,
-                             FOREIGN KEY (SchülerID) REFERENCES `BENUTZER`(`SchülerID`) ON DELETE CASCADE,
+                             FOREIGN KEY (SchuelerID) REFERENCES `SCHUELER`(`SchuelerID`) ON DELETE CASCADE,
                              FOREIGN KEY (ExemplarID) REFERENCES `EXEMPLAR`(`ExemplarID`) ON DELETE CASCADE
                          ); """
 
@@ -186,23 +186,23 @@ class SQLiteModel(object):
         return self.cursor.fetchone()
 
     def getStudentIDs(self):
-        self.cursor.execute("SELECT BenutzerID FROM BENUTZER;")
+        self.cursor.execute("SELECT SchuelerID FROM SCHUELER;")
         return self.cursor.fetchall()
 
-    def getStudentID(self, vorname: str, nachname: str, klasse: int):
-        self.cursor.execute(f"SELECT BenutzerID FROM BENUTZER WHERE Vorname = {vorname} AND Nachname = {nachname} AND Klasse = {klasse};")
+    def getStudentID(self, vorname: str, nachname: str, klasse: str):
+        self.cursor.execute(f"SELECT SchuelerID FROM SCHUELER WHERE Vorname = {vorname} AND Nachname = {nachname} AND Klasse = '{klasse}';")
         return self.cursor.fetchone()
 
-    def getStudentSurName(self, benutzer_id: int):  # -> str
-        self.cursor.execute(f"SELECT Vorname FROM BENUTZER WHERE BenutzerID = {benutzer_id};")
+    def getStudentSurName(self, student_id: int):  # -> str
+        self.cursor.execute(f"SELECT Vorname FROM SCHUELER WHERE SchuelerID = {student_id};")
         return self.cursor.fetchone()
 
-    def getStudentLastName(self, benutzer_id: int):  # -> str
-        self.cursor.execute(f"SELECT Nachname FROM BENUTZER WHERE BenutzerID = {benutzer_id};")
+    def getStudentLastName(self, student_id: int):  # -> str
+        self.cursor.execute(f"SELECT Nachname FROM SCHUELER WHERE SchuelerID = {student_id};")
         return self.cursor.fetchone()
 
-    def getStudentSchoolClass(self, benutzer_id: int):  # -> str
-        self.cursor.execute(f"SELECT Klasse FROM BENUTZER WHERE BenutzerID = {benutzer_id};")
+    def getStudentSchoolClass(self, student_id: int):  # -> str
+        self.cursor.execute(f"SELECT Klasse FROM SCHUELER WHERE SchuelerID = {student_id};")
         return self.cursor.fetchone()
 
     def getBookIDs(self):  # -> list(int)
@@ -214,7 +214,7 @@ class SQLiteModel(object):
         return self.cursor.fetchone()
 
     def getBookStudentID(self, bookID):
-        self.cursor.execute(f"SELECT BenutzerID FROM AUSLEIHE WHERE ExemplarID = {bookID};")
+        self.cursor.execute(f"SELECT SchuelerID FROM AUSLEIHE WHERE ExemplarID = {bookID};")
         return self.cursor.fetchone()
 
     def isBookBorrowed(self, exemplar_id: int):  # -> bool
@@ -232,7 +232,7 @@ class SQLiteModel(object):
     #  takes 3 parameters [Vorname, Nachname, Klasse]
     #
     #  @method insertAusleihe:
-    #  takes 4 parameters [BenutzerID, ExemplarID, DatumEntleihe, DatumRückgabe]
+    #  takes 4 parameters [SchuelerID, ExemplarID, DatumEntleihe]
     #
     #  @method insertExemplar:
     #  takes 2 parameters [TitelID, Bemerkung]
@@ -245,22 +245,27 @@ class SQLiteModel(object):
     #
     #######################################################################
 
-    def insertSchueler(self, vorname: str, nachname: str, klasse: int):
+    def insertSchueler(self, vorname: str, nachname: str, klasse: str):
         self.cursor.execute(
-            "INSERT INTO SCHÜLER (Vorname, Nachname, Klasse) "
+            "INSERT INTO SCHUELER (Vorname, Nachname, Klasse) "
             "VALUES (?, ?, ?);", (vorname, nachname, klasse)
         )
         self.cursor.execute(
-            f"SELECT SchülerID FROM SCHÜLER WHERE Vorname = '{vorname}' AND Nachname = '{nachname}' AND Klasse = {klasse};")
+            f"SELECT SchuelerID FROM SCHueLER WHERE Vorname = '{vorname}' AND Nachname = '{nachname}' AND Klasse = '{klasse}';")
         return self.cursor.fetchone()
 
-    def insertAusleihe(self, benutzer_id: int, exemplar_id: int, datum_entleihe: datetime, datum_rueckgabe: datetime):
+    def insertAusleihe(self, student_id: int, exemplar_id: int, datum_entleihe: datetime):
         self.cursor.execute(
-            "INSERT INTO AUSLEIHE (SchülerID, ExemplarID, DatumEntleihe, DatumRückgabe) "
-            "VALUES (?, ?, ?, ?);", (benutzer_id, exemplar_id, datum_entleihe, datum_rueckgabe)
+            "INSERT INTO AUSLEIHE (SchuelerID, ExemplarID, DatumEntleihe) "
+            "VALUES (?, ?, ?);", (student_id, exemplar_id, datum_entleihe)
         )
         self.cursor.execute(
-            f"SELECT VorgangsID FROM AUSLEIHE WHERE SchülerID = {benutzer_id} AND ExemplarID = {exemplar_id} AND DatumEntleihe = {datum_entleihe} AND DatumRückgabe = {datum_rueckgabe}  ")
+            f"SELECT VorgangsID FROM AUSLEIHE WHERE SchuelerID = {student_id} AND ExemplarID = {exemplar_id} AND DatumEntleihe = {datum_entleihe} ")
+        return self.cursor.fetchone()
+
+    def getAusleiheID(self, student_id: int, exemplar_id: int):
+        self.cursor.execute(
+            f"SELECT VorgangsID FROM AUSLEIHE WHERE SchuelerID = {student_id} AND ExemplarID = {exemplar_id} ")
         return self.cursor.fetchone()
 
 
@@ -301,8 +306,8 @@ class SQLiteModel(object):
 
     # DELETE
 
-    def deleteRow(self, table_name: str, row_id: int):
-        self.cursor.execute(f"DELETE FROM {table_name} WHERE id = {row_id};")
+    def deleteRow(self, table_name: str, tableIDColumn: str, row_id: int):
+        self.cursor.execute(f"DELETE FROM {table_name} WHERE {tableIDColumn} = {row_id};")
 
     #######################################################################
     #
@@ -328,7 +333,7 @@ class SQLiteModel(object):
     #######################################################################
 
     def __enter__(self):
-        print("\nConnected to the database...\n")
+        # ("\nConnected to the database...\n")
         return self
 
     def __exit__(self, ext_type, exc_value, traceback):
@@ -339,7 +344,31 @@ class SQLiteModel(object):
         else:
             self.connection.commit()
         self.connection.close()
-        print("\nClosed connection to the database...")
+        # print("\nClosed connection to the database...")
+
+    #######################################################################
+    #
+    #  Function to generate a QR-Code as image out of a number.
+    #
+    #  This function is used to convert the book id into a qr-code
+    #  and save it locally as image
+    #
+    #  @param id: A number that represents a Book ID
+    #
+    #######################################################################
+
+    def generateQRCode(self, id: int):
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=10,
+            border=4,
+        )
+        qr.add_data(id)
+        qr.make(fit=True)
+
+        img = qr.make_image(fill_color="black", back_color="white")
+        img.save(os.getcwd() + "\\Book" + str(id) + ".png")
 
 
 if __name__ == "__main__":
@@ -365,6 +394,6 @@ if __name__ == "__main__":
 
         db.tableInfo()
 
-        print(db.getTable("SCHÜLER", "*"))
-        print(db.getTable("SCHÜLER", "Vorname, Nachname"))
-        db.dumpTable(['SCHÜLER', 'AUSLEIHE', 'EXEMPLAR', 'TITEL', 'FACHWERK'])
+        print(db.getTable("SCHUELER", "*"))
+        print(db.getTable("SCHUELER", "Vorname, Nachname"))
+        db.dumpTable(['SCHUELER', 'AUSLEIHE', 'EXEMPLAR', 'TITEL', 'FACHWERK'])

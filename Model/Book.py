@@ -14,7 +14,7 @@ class Book:
         books.append(self)
 
 
-def getBook(id: int):
+def getBook(id: int) -> Book:
     for book in books:
         if book.id == id:
             return book
