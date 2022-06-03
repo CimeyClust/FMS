@@ -19,3 +19,9 @@ def getTitle(id: int):
         if title.id == id:
             return title
     return None
+
+def getTitleByName(name: str):
+    for title in titles:
+        if title.title == name:
+            return title
+    return None

@@ -217,7 +217,7 @@ class MainView(View, customtkinter.CTk):
         self.checkbox_button_1 = customtkinter.CTkButton(master=self.frame_right, text="QR-Code erstellen", image=QRIcon, command=lambda: self.control.handleCallback(Callback.CREATE_QRCODE, self.trv), state=tkinter.DISABLED, text_color="Black", fg_color=("gray75", "White"), hover_color="#9c9a9a")
         self.checkbox_button_1.grid(row=6, column=2, columnspan=1, pady=10, padx=20, sticky="we")
 
-        self.checkbox_button_2 = customtkinter.CTkButton(master=self.frame_info, text="Ausleihen", command=self.button_event, fg_color="#737373", text_color="Black", state=tkinter.DISABLED)
+        self.checkbox_button_2 = customtkinter.CTkButton(master=self.frame_info, text="Ausleihen", command=self.leasing, fg_color="#737373", text_color="Black", state=tkinter.DISABLED)
         self.checkbox_button_2.grid(row=6, column=0, columnspan=2, pady=10, padx=10, sticky="we")
 
         self.searchLabel = customtkinter.CTkLabel(master=self.frame_right,
@@ -246,10 +246,6 @@ class MainView(View, customtkinter.CTk):
         # self.check_box_2.select()
 
         self.start()
-
-
-    def button_event(self):
-        print("Button pressed")
 
 
     def change_mode(self):
@@ -308,6 +304,7 @@ class MainView(View, customtkinter.CTk):
             self.subject_cb.grid(row=0, column=4, columnspan=3, pady=20, padx=20, sticky="nesw")
             self.subject_cb['state'] = 'readonly'
             self.subject_cb['values'] = self.values[1]
+            self.subject_cb.current(0)
             #self.subject_cb['values'] = [book.title.author for book, index in zip(values, range(0, len(values)-1))]
 
             self.title=customtkinter.CTkLabel(master=self.frame_input,anchor=tkinter.W, justify=tkinter.LEFT, text="Titel:", text_font='Arial 13').grid(row=1, column=0, columnspan=1, pady=20, padx=0, sticky="w")
@@ -327,7 +324,7 @@ class MainView(View, customtkinter.CTk):
             self.amountentry.grid(row=4, column=4, columnspan=3, pady=20, padx=20, sticky="nesw")
 
             self.finish = customtkinter.CTkButton(self.editwindow, text="Fertig", fg_color="#38FF88", hover_color="#30d973", text_color="Black").grid(row=7, column=2, columnspan=1, pady=10, padx=20, sticky="nesw")
-            self.stop = customtkinter.CTkButton(self.editwindow, text="Abbrechen",fg_color="#ff5e5e", hover_color="#c94949", text_color="Black", command=self.on_closing).grid(row=7, column=1, columnspan=1, pady=10, padx=20, sticky="nesw")
+            self.stop = customtkinter.CTkButton(self.editwindow, text="Abbrechen", fg_color="#ff5e5e", hover_color="#c94949", text_color="Black", command=self.on_closing).grid(row=7, column=1, columnspan=1, pady=10, padx=20, sticky="nesw")
             self.titleentry.insert(0, curDict[0])
             self.isbnentry.insert(0, curDict[1])
             self.autorentry.insert(0, curDict[2])
@@ -386,6 +383,7 @@ class MainView(View, customtkinter.CTk):
         self.subject_cb2.grid(row=1, column=1, columnspan=10, pady=20, padx=20, sticky="nesw")
         self.subject_cb2['state'] = 'readonly'
         self.subject_cb2['values'] = self.values[1]
+        self.subject_cb2.current(0)
         #self.subject_cb['values'] = [book.title.author for book, index in zip(values, range(0, len(values)-1))]
 
         self.title=customtkinter.CTkLabel(master=self.frame_input,anchor=tkinter.W, justify=tkinter.LEFT, text="Titel:", text_font='Arial 13').grid(row=2, column=0, columnspan=1, pady=20, padx=0, sticky="w")
@@ -404,7 +402,7 @@ class MainView(View, customtkinter.CTk):
         self.amountentry = customtkinter.CTkEntry(master=self.frame_input, width=790)
         self.amountentry.grid(row=5, column=1, columnspan=10, pady=20, padx=20, sticky="nesw")
 
-        self.finish = customtkinter.CTkButton(self.editwindow, text="Fertig",fg_color="#38FF88", hover_color="#30d973", text_color="Black").grid(row=7, column=2, columnspan=1, pady=10, padx=20, sticky="nesw")
+        self.finish = customtkinter.CTkButton(self.editwindow, text="Fertig",fg_color="#38FF88", hover_color="#30d973", text_color="Black", command=lambda: self.control.handleCallback(Callback.TITLE_CREATE, self.subject_cb2, self.titleentry, self.isbnentry, self.autorentry, self.amountentry)).grid(row=7, column=2, columnspan=1, pady=10, padx=20, sticky="nesw")
         self.stop = customtkinter.CTkButton(self.editwindow, text="Abbrechen",fg_color="#ff5e5e", hover_color="#c94949", text_color="Black", command=self.on_closing).grid(row=7, column=1, columnspan=1, pady=10, padx=20, sticky="nesw")
 
         self.editwindow.protocol("WM_DELETE_WINDOW", self.on_closing)
@@ -431,6 +429,7 @@ class MainView(View, customtkinter.CTk):
         self.subject_cb1.grid(row=3, column=0, columnspan=3, pady=(10, 20), padx=(30, 10), sticky="nesw")
         self.subject_cb1['state'] = 'readonly'
         self.subject_cb1['values'] = self.values[1]
+        self.subject_cb1.current(0)
         self.createbut = customtkinter.CTkButton(master=self.frame_input1, text="Fachbereich löschen", text_color="Black", command=lambda: self.control.handleCallback(Callback.DELETE_SUBJECT, self.subject_cb1.get())).grid(row=3, column=4, columnspan=1, pady=(10, 20), padx=(10, 30), sticky="nesw")
 
         self.finish = customtkinter.CTkButton(self.subjectwindow, text="Fertig", fg_color="#38FF88", hover_color="#30d973", text_color="Black", command=self.on_closing2).grid(row=7, column=1, columnspan=2, pady=10, padx=20, sticky="nesw")
@@ -439,7 +438,6 @@ class MainView(View, customtkinter.CTk):
         self.subjectwindow.mainloop()
 
     def reloadTable(self, books):
-        print(len(books))
         for row in self.trv.get_children():
             self.trv.delete(row)
 
@@ -449,6 +447,17 @@ class MainView(View, customtkinter.CTk):
                 student = book.student.name + " " + book.student.surname
             self.trv.insert(parent='', index='end', iid=book.id, text=book.id,
                             values=(book.title.title, book.title.isbn, book.title.author, book.title.subject.subjectTitle, student))
+
+    def addBookToTable(self, books):
+        # Reload table
+        if self.radio_var.get() == 0 or self.radio_var.get() == 1:
+            for book, index in zip(books, range(0, len(books))):
+                student = ""
+            if book.student is not None:
+                student = book.student.name + " " + book.student.surname
+            self.trv.insert(parent='', index='end', iid=book.id, text=book.id,
+                            values=(book.title.title, book.title.isbn, book.title.author, book.title.subject.subjectTitle, student))
+
 
 
     def on_closing(self, event=0):
@@ -462,12 +471,15 @@ class MainView(View, customtkinter.CTk):
     def updateSubjects(self, subjects: list):
         if hasattr(self, "subject_cb1"):
             self.subject_cb1['values'] = subjects
+            self.subject_cb1.current(0)
 
         if hasattr(self, "subject_cb2"):
             self.subject_cb2['values'] = subjects
+            self.subject_cb2.current(0)
 
         if hasattr(self, "subject_cb"):
             self.subject_cb['values'] = subjects
+            self.subject_cb.current(0)
 
 
     # Hide the current view and disable it

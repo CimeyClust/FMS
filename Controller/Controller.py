@@ -3,6 +3,7 @@ import time
 import tkinter
 
 from Controller.CallbackRegister import Callback
+from Controller.KeyListener import KeyListener
 from Controller.ViewHandler import ViewHandler
 from Controller.ViewRegister import ViewRegister
 from Model import Book, Subject, Student
@@ -18,6 +19,9 @@ class Controller(unittest.TestCase):
 
         # Create test database input at beginning
         # self.createTestDatabaseInput()
+
+        # Register listener for book deletion
+        KeyListener(self)
 
         # Load data
         self.loadSubjects()
@@ -146,7 +150,6 @@ class Controller(unittest.TestCase):
         elif callbackType == Callback.DELETE_SUBJECT:
             try:
                 with SQLiteModel() as db:
-                    print(values[0])
                     db.deleteRow("FACHBEREICH", "FachbereichsID", Subject.getSubjectByName(values[0]).id)
                     Subject.subjects.remove(Subject.getSubjectByName(values[0]))
                     self.mainView.updateSubjects(self.getAllSubjectNames())
@@ -258,23 +261,88 @@ class Controller(unittest.TestCase):
 
             for book in Book.books:
                 if book.student is None:
-                    if content in book.title.title or content in book.title.author or content in book.title.isbn:
-                        matchedBooks.append(book)
-                else:
                     if content.isnumeric():
-                        if content in book.title.title or content in book.student.surname or \
-                                content in book.student.name or content in book.student.schoolClass or \
-                                content in book.title.author or content in book.title.isbn or int(content) == book.id:
+                        if 10 < int(content):
+                            if content in book.title.title or content in book.title.author or content in book.title.isbn \
+                                    or int(content) == book.id:
+                                matchedBooks.append(book)
+                        elif int(content) == book.id:
                             matchedBooks.append(book)
                     else:
-                        print(book.student.name)
-                        print(content in book.student.surname)
+                        if content in book.title.title or content in book.title.author or content in book.title.isbn:
+                            matchedBooks.append(book)
+                else:
+                    if content.isnumeric():
+                        if 10 < int(content):
+                            if content in book.title.title or content in book.student.surname or \
+                                    content in book.student.name or content in book.student.schoolClass or \
+                                    content in book.title.author or content in book.title.isbn or int(content) == book.id:
+                                matchedBooks.append(book)
+                        else:
+                            if int(content) == book.id:
+                                matchedBooks.append(book)
+                    else:
                         if content in book.title.title or content in book.student.surname or \
                                 content in book.student.name or content in book.student.schoolClass or \
                                 content in book.title.author or content in book.title.isbn:
                             matchedBooks.append(book)
 
             self.mainView.reloadTable(matchedBooks)
+
+        elif callbackType == Callback.TITLE_CREATE:
+            subject = Subject.getSubjectByName(values[0].get())
+            titleName = values[1].get()
+            isbn = values[2].get()
+            author = values[3].get()
+            amount = values[4].get()
+
+            # Check if the amount number by the user is really a number
+            if amount.isnumeric():
+                amount = int(amount)
+
+                if amount > 10000:
+                    return
+            else:
+                return
+
+            books = []
+            with SQLiteModel() as db:
+                titleID = db.insertTitel(subject.id, titleName, author, isbn)[0]
+                title = Title.Title(titleID, titleName, isbn, author, subject)
+
+                # Create all the books, given in amount
+                for bookIndex in range(amount + 1):
+                    bookID = db.insertExemplar(titleID, "")[0]
+                    books.append(Book.Book(bookID, False, title))
+
+            self.mainView.addBookToTable(books)
+            values[1].delete(0, 'end')
+            values[2].delete(0, 'end')
+            values[3].delete(0, 'end')
+            values[4].delete(0, 'end')
+
+        elif callbackType == Callback.TITLE_EDIT_INIT:
+            pass
+
+        elif callbackType == Callback.BOOK_DELETE:
+            curItemID = self.mainView.trv.focus()
+            if not curItemID == "":
+                curItem = self.mainView.trv.item(curItemID)
+                bookID = curItem.get("text")[0]
+
+                with SQLiteModel() as db:
+                    db.deleteRow("EXEMPLAR", "ExemplarID", bookID)
+                    Book.books.remove(Book.getBook(bookID))
+
+                if self.mainView.radio_var.get() == 0:
+                    self.mainView.reloadTable(self.getBooks())
+                elif self.mainView.radio_var.get() == 1:
+                    self.mainView.reloadTable(self.getBooks(False))
+                elif self.mainView.radio_var.get() == 2:
+                    self.mainView.reloadTable(self.getBooks(True))
+
+
+
 
     def createTestDatabaseInput(self):
         with SQLiteModel() as db:
