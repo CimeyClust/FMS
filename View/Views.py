@@ -75,11 +75,11 @@ class MainView(View, customtkinter.CTk):
         self.geometry(f"{MainView.WIDTH}x{MainView.HEIGHT}")
         self.minsize(MainView.WIDTH, MainView.HEIGHT)
         # self.minsize(App.WIDTH, App.HEIGHT)
-        QRIcon = PhotoImage(file=f"{os.getcwd()}\View\images\qriconsmall.png")
-        Bild1 = PhotoImage(file=f"{os.getcwd()}\View\images\logo.png")
-        editicon = PhotoImage(file=f"{os.getcwd()}\View\images\stifticon.png")
-        searchicon = PhotoImage(file=f"{os.getcwd()}\View\images\searchicon.png")
-        plusicon = PhotoImage(file=f"{os.getcwd()}\View\images\plus.png")
+        QRIcon = PhotoImage(file=f"View\images\qriconsmall.png")
+        Bild1 = PhotoImage(file=f"View\images\logo.png")
+        editicon = PhotoImage(file=f"View\images\stifticon.png")
+        searchicon = PhotoImage(file=f"View\images\searchicon.png")
+        plusicon = PhotoImage(file=f"View\images\plus.png")
         # QRIcon=PhotoImage(file="images/qriconsmall.png")
         # self.protocol("WM_DELETE_WINDOW", self.on_closing)  # call .on_closing() when app gets closed
 
