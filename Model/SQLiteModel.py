@@ -190,7 +190,8 @@ class SQLiteModel(object):
         return self.cursor.fetchall()
 
     def getStudentID(self, vorname: str, nachname: str, klasse: str):
-        self.cursor.execute(f"SELECT SchuelerID FROM SCHUELER WHERE Vorname = {vorname} AND Nachname = {nachname} AND Klasse = '{klasse}';")
+        self.cursor.execute(
+            f"SELECT SchuelerID FROM SCHUELER WHERE Vorname = {vorname} AND Nachname = {nachname} AND Klasse = '{klasse}';")
         return self.cursor.fetchone()
 
     def getStudentSurName(self, student_id: int):  # -> str
@@ -268,7 +269,6 @@ class SQLiteModel(object):
             f"SELECT VorgangsID FROM AUSLEIHE WHERE SchuelerID = {student_id} AND ExemplarID = {exemplar_id} ")
         return self.cursor.fetchone()
 
-
     def insertExemplar(self, titel_id: int, bemerkung: str):
         self.cursor.execute(
             "INSERT INTO EXEMPLAR (TitelID, Bemerkung) "
@@ -291,18 +291,18 @@ class SQLiteModel(object):
     def insertFachbereich(self, fachbereichsname: str):
         self.cursor.execute(
             "INSERT INTO FACHBEREICH (Fachbereichsname) "
-            "VALUES (?);", (fachbereichsname, )
+            "VALUES (?);", (fachbereichsname,)
         )
         self.cursor.execute(
             f"SELECT FachbereichsID FROM FACHBEREICH WHERE Fachbereichsname = '{fachbereichsname}'"
         )
         return self.cursor.fetchone()
 
-
     # UPDATE
 
-    def update(self):
-        pass
+    def updateTitle(self, titleID: int, titleName: str, isbn: str, author: str, subjectID: int):
+        statement = f"UPDATE TITEL SET Titelname = '{titleName}', Autor = '{author}', ISBN = '{isbn}', FachbereichsID = {subjectID} WHERE TitelID = {titleID};"
+        self.cursor.execute(statement)
 
     # DELETE
 
@@ -374,7 +374,6 @@ class SQLiteModel(object):
 if __name__ == "__main__":
     os.remove("fms.db")
     with SQLiteModel() as db:
-
         db.insertSchueler("Yassin", "Starzetz", 1011)
         db.insertSchueler("Luis", "Hamann", 1011)
         db.insertSchueler("Leon", "Martin", 1011)

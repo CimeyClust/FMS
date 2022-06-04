@@ -19,3 +19,9 @@ def getTitle(id: int):
         if title.id == id:
             return title
     return None
+
+def getTitleByNameAndISBN(name: str, isbn: str):
+    for title in titles:
+        if title.title == name and str(title.isbn) == str(isbn):
+            return title
+    return None
