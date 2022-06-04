@@ -284,6 +284,8 @@ class Controller(unittest.TestCase):
 
         elif callbackType == Callback.SEARCH:
             content = values[0].get()
+            if content == "Suchen": return
+
             matchedBooks = []
 
             for book in Book.books:
@@ -399,6 +401,8 @@ class Controller(unittest.TestCase):
             curItem = self.mainView.trv.item(curItemID)
 
             subject = Subject.getSubjectByName(values[0].get())
+            if subject is None: return
+
             titleNameBefore = curItem.get("values")[0]
             titleName = values[1].get()
             isbnBefore = curItem.get("values")[1]
@@ -435,6 +439,7 @@ class Controller(unittest.TestCase):
                 self.mainView.reloadTable(self.getBooks(True))
 
             self.mainView.editwindow.after(100, self.mainView.editwindow.destroy)
+            self.mainView.trigger1 = False
 
 
 
