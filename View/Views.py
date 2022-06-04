@@ -223,14 +223,14 @@ class MainView(View, customtkinter.CTk):
         self.checkbox_button_2 = customtkinter.CTkButton(master=self.frame_info, text="Ausleihen", command=self.leasing, fg_color="#737373", text_color="Black", state=tkinter.DISABLED)
         self.checkbox_button_2.grid(row=6, column=0, columnspan=2, pady=10, padx=10, sticky="we")
 
-        self.searchLabel = customtkinter.CTkLabel(master=self.frame_right,
+        """self.searchLabel = customtkinter.CTkLabel(master=self.frame_right,
                                                   text="Suchen:", text_font='Arial 13 bold')
-        self.searchLabel.grid(row=8, column=0, columnspan=1, pady=0, padx=0, sticky="es")
+        self.searchLabel.grid(row=8, column=0, columnspan=1, pady=0, padx=0, sticky="es")"""
 
         self.sv = tkinter.StringVar()
         self.sv.trace("w", lambda name, index, mode, sv=self.sv: self.control.handleCallback(Callback.SEARCH, self.sv))
-        self.entry = customtkinter.CTkEntry(master=self.frame_right, width=120, textvariable=self.sv)
-        self.entry.grid(row=9, column=0, columnspan=2, pady=25, padx=20, sticky="we")
+        self.entry = customtkinter.CTkEntry(master=self.frame_right, width=120, textvariable=self.sv, placeholder_text="Suchen")
+        self.entry.grid(row=8, column=0, columnspan=2, pady=25, padx=20, sticky="we")
 
         '''self.button_5 = customtkinter.CTkButton(master=self.frame_right, text="Suchen", compound="left", text_color="Black", image=searchicon)
         self.button_5.grid(row=11, column=2, columnspan=1, pady=25, padx=20, sticky="we")'''
