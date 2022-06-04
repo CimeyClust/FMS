@@ -1,3 +1,10 @@
+###########################################################################
+#
+# CallbackRegister.py
+# Program made by Jan, Sinan and Leon for the FMS project.
+#
+###########################################################################
+
 from enum import Enum
 
 
@@ -11,4 +18,5 @@ class Callback(Enum):
     SEARCH = 7,
     TITLE_CREATE = 8,
     TITLE_EDIT_INIT = 9,
-    BOOK_DELETE = 10
+    BOOK_DELETE = 10,
+    TITLE_EDIT = 11

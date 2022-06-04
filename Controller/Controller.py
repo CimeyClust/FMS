@@ -1,9 +1,16 @@
+###########################################################################
+#
+# Controller.py
+# Program made by Jan, Sinan and Leon for the FMS project.
+#
+###########################################################################
+
+import asyncio
 import datetime
 import time
 import tkinter
 
 from Controller.CallbackRegister import Callback
-from Controller.KeyListener import KeyListener
 from Controller.ViewHandler import ViewHandler
 from Controller.ViewRegister import ViewRegister
 from Model import Book, Subject, Student
@@ -21,7 +28,7 @@ class Controller(unittest.TestCase):
         # self.createTestDatabaseInput()
 
         # Register listener for book deletion
-        KeyListener(self)
+        # asyncio.run(KeyListener.registerTask())
 
         # Load data
         self.loadSubjects()
@@ -149,10 +156,30 @@ class Controller(unittest.TestCase):
 
         elif callbackType == Callback.DELETE_SUBJECT:
             try:
+                subject = Subject.getSubjectByName(values[0])
+
+                # Delete books and titles, which belong to this subject
+                for book in Book.books:
+                    if book.title.subject == subject:
+                        SQLiteModel().deleteRow("EXEMPLAR", "ExemplarID", book.id)
+                        Book.books.remove(book)
+
+                for title in Title.titles:
+                    if title.subject == subject:
+                        SQLiteModel().deleteRow("TITEL", "TitelID", title.id)
+                        Title.titles.remove(title)
+
                 with SQLiteModel() as db:
-                    db.deleteRow("FACHBEREICH", "FachbereichsID", Subject.getSubjectByName(values[0]).id)
+                    db.deleteRow("FACHBEREICH", "FachbereichsID", subject.id)
                     Subject.subjects.remove(Subject.getSubjectByName(values[0]))
                     self.mainView.updateSubjects(self.getAllSubjectNames())
+
+                if self.mainView.radio_var.get() == 0:
+                    self.mainView.reloadTable(self.getBooks())
+                elif self.mainView.radio_var.get() == 1:
+                    self.mainView.reloadTable(self.getBooks(False))
+                elif self.mainView.radio_var.get() == 2:
+                    self.mainView.reloadTable(self.getBooks(True))
             except:
                 pass
 
@@ -201,7 +228,7 @@ class Controller(unittest.TestCase):
                 command=lambda: self.mainView.control.handleCallback(Callback.RETURN_BOOK, self.mainView.trv)
             )
 
-            self.mainView.editwindow.destroy()
+            self.mainView.editwindow.after(100, self.mainView.editwindow.destroy)
 
             curItemID = values[3].focus()
             curItem = values[3].item(curItemID)
@@ -311,35 +338,104 @@ class Controller(unittest.TestCase):
                 title = Title.Title(titleID, titleName, isbn, author, subject)
 
                 # Create all the books, given in amount
-                for bookIndex in range(amount + 1):
-                    bookID = db.insertExemplar(titleID, "")[0]
+                for bookIndex in range(0, amount):
+                    bookID = db.insertExemplar(titleID, str(bookIndex))[0]
                     books.append(Book.Book(bookID, False, title))
 
-            self.mainView.addBookToTable(books)
+            if self.mainView.radio_var.get() == 0:
+                self.mainView.reloadTable(self.getBooks())
+            elif self.mainView.radio_var.get() == 1:
+                self.mainView.reloadTable(self.getBooks(False))
+            elif self.mainView.radio_var.get() == 2:
+                self.mainView.reloadTable(self.getBooks(True))
             values[1].delete(0, 'end')
             values[2].delete(0, 'end')
             values[3].delete(0, 'end')
             values[4].delete(0, 'end')
 
         elif callbackType == Callback.TITLE_EDIT_INIT:
-            pass
+            curItemID = values[0].focus()
+            curItem = values[0].item(curItemID)
+            bookID = int(curItem.get("text"))
+
+            # Get the amount of all books with the same title
+            book = Book.getBook(bookID)
+            amount = 0
+            for currentBook in Book.books:
+                if currentBook.title == book.title:
+                    amount += 1
+
+            self.mainView.edit(amount)
 
         elif callbackType == Callback.BOOK_DELETE:
+            curItemID = values[0].focus()
+            curItem = values[0].item(curItemID)
+            try: bookID = int(curItem.get("text"))
+            except: return
+
+            with SQLiteModel() as db:
+                db.deleteRow("EXEMPLAR", "ExemplarID", bookID)
+                Book.books.remove(Book.getBook(bookID))
+
+            if self.mainView.radio_var.get() == 0:
+                self.mainView.reloadTable(self.getBooks())
+            elif self.mainView.radio_var.get() == 1:
+                self.mainView.reloadTable(self.getBooks(False))
+            elif self.mainView.radio_var.get() == 2:
+                self.mainView.reloadTable(self.getBooks(True))
+
+            # Set focus back
+            newIndex = (int(curItemID) - 1)
+            values[0].focus_set()
+            if Book.getBook(newIndex) is None:
+                newIndex = (int(curItemID) + 1)
+
+            if not Book.getBook(newIndex) is None:
+                values[0].selection_set(newIndex)
+                values[0].focus(newIndex)
+
+        elif callbackType == Callback.TITLE_EDIT:
             curItemID = self.mainView.trv.focus()
-            if not curItemID == "":
-                curItem = self.mainView.trv.item(curItemID)
-                bookID = curItem.get("text")[0]
+            curItem = self.mainView.trv.item(curItemID)
 
-                with SQLiteModel() as db:
-                    db.deleteRow("EXEMPLAR", "ExemplarID", bookID)
-                    Book.books.remove(Book.getBook(bookID))
+            subject = Subject.getSubjectByName(values[0].get())
+            titleNameBefore = curItem.get("values")[0]
+            titleName = values[1].get()
+            isbnBefore = curItem.get("values")[1]
+            isbn = values[2].get()
+            author = values[3].get()
+            amount = values[4].get()
 
-                if self.mainView.radio_var.get() == 0:
-                    self.mainView.reloadTable(self.getBooks())
-                elif self.mainView.radio_var.get() == 1:
-                    self.mainView.reloadTable(self.getBooks(False))
-                elif self.mainView.radio_var.get() == 2:
-                    self.mainView.reloadTable(self.getBooks(True))
+            # Check if the amount number by the user is really a number
+            if amount.isnumeric():
+                amount = int(amount)
+
+                if amount > len(Book.books):
+                    return
+            else:
+                return
+
+            with SQLiteModel() as db:
+                oldTitle = Title.getTitleByNameAndISBN(titleNameBefore, isbnBefore)
+
+                # Update database
+                db.updateTitle(oldTitle.id, titleName, isbn, author, subject.id)
+
+                # Update title instances
+                oldTitle.title = titleName
+                oldTitle.isbn = isbn
+                oldTitle.author = author
+                oldTitle.subject = subject
+
+            if self.mainView.radio_var.get() == 0:
+                self.mainView.reloadTable(self.getBooks())
+            elif self.mainView.radio_var.get() == 1:
+                self.mainView.reloadTable(self.getBooks(False))
+            elif self.mainView.radio_var.get() == 2:
+                self.mainView.reloadTable(self.getBooks(True))
+
+            self.mainView.editwindow.after(100, self.mainView.editwindow.destroy)
+
 
 
 
