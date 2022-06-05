@@ -336,7 +336,7 @@ class MainView(View, customtkinter.CTk):
         except IndexError:
             pass
 
-    def edit(self, amount):
+    def edit(self, amount, subjects):
         if self.trigger1: return
         curItemID = self.trv.focus()
         if not curItemID == "":
@@ -358,7 +358,7 @@ class MainView(View, customtkinter.CTk):
             self.subject_cb = ttk.Combobox(master=self.frame_input, textvariable=self.selected_subject)
             self.subject_cb.grid(row=0, column=4, columnspan=3, pady=20, padx=20, sticky="nesw")
             self.subject_cb['state'] = 'readonly'
-            self.subject_cb['values'] = self.values[1]
+            self.subject_cb['values'] = subjects
             # self.subject_cb['values'] = [book.title.author for book, index in zip(values, range(0, len(values)-1))]
 
             self.title = customtkinter.CTkLabel(master=self.frame_input, anchor=tkinter.W, justify=tkinter.LEFT,
@@ -400,8 +400,8 @@ class MainView(View, customtkinter.CTk):
                                                 command=self.on_closing).grid(row=7, column=1, columnspan=1, pady=10,
                                                                               padx=20, sticky="nesw")
 
-            for subjectIndex in range(len(self.values[1])):
-                if self.values[1][subjectIndex] == str(curDict[3]):
+            for subjectIndex in range(len(subjects)):
+                if subjects[subjectIndex] == str(curDict[3]):
                     self.subject_cb.current(subjectIndex)
             self.titleentry.insert(0, curDict[0])
             self.isbnentry.insert(0, curDict[1])
@@ -628,7 +628,6 @@ class MainView(View, customtkinter.CTk):
                     self.trv.insert(parent='', index='end', iid=index, text=book.id,
                                     values=(book.title.title, book.title.isbn, book.title.author,
                                             book.title.subject.subjectTitle, student, group))
-
         except:
             pass
 

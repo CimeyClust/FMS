@@ -361,7 +361,7 @@ class Controller(unittest.TestCase):
             book = Book.getBook(bookID)
             amount = self.getBookAmount(book.title)
 
-            self.mainView.edit(amount)
+            self.mainView.edit(amount, self.getAllSubjectNames())
 
         elif callbackType == Callback.BOOK_DELETE:
             curItemID = values[0].focus()
