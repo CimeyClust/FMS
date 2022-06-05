@@ -142,6 +142,13 @@ class Controller(unittest.TestCase):
 
         return subjectNames
 
+    def getBookAmount(self, title: Title.Title):
+        amount = 0
+        for currentBook in Book.books:
+            if currentBook.title == title:
+                amount += 1
+        return amount
+
     """
     Handles the callbacks of the view
     """
@@ -344,6 +351,8 @@ class Controller(unittest.TestCase):
                     bookID = db.insertExemplar(titleID, str(bookIndex))[0]
                     books.append(Book.Book(bookID, False, title))
 
+                Book.books = []
+
             if self.mainView.radio_var.get() == 0:
                 self.mainView.reloadTable(self.getBooks())
             elif self.mainView.radio_var.get() == 1:
@@ -362,10 +371,7 @@ class Controller(unittest.TestCase):
 
             # Get the amount of all books with the same title
             book = Book.getBook(bookID)
-            amount = 0
-            for currentBook in Book.books:
-                if currentBook.title == book.title:
-                    amount += 1
+            amount = self.getBookAmount(book.title)
 
             self.mainView.edit(amount)
 
@@ -413,9 +419,6 @@ class Controller(unittest.TestCase):
             # Check if the amount number by the user is really a number
             if amount.isnumeric():
                 amount = int(amount)
-
-                if amount > len(Book.books):
-                    return
             else:
                 return
 
@@ -430,6 +433,14 @@ class Controller(unittest.TestCase):
                 oldTitle.isbn = isbn
                 oldTitle.author = author
                 oldTitle.subject = subject
+
+                currentAmount = self.getBookAmount(oldTitle)
+                if amount < currentAmount:
+                    return
+
+                for newBookNumber in range(0, (amount - currentAmount)):
+                    bookID = db.insertExemplar(oldTitle.id, str(newBookNumber))[0]
+                    Book.Book(bookID, False, oldTitle)
 
             if self.mainView.radio_var.get() == 0:
                 self.mainView.reloadTable(self.getBooks())
