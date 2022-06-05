@@ -113,24 +113,6 @@ class Controller(unittest.TestCase):
                         Title.getTitle(db.getBookTitleID(bookID[0])[0]),
                     )
 
-    async def loadBooksAsync(self):
-        await asyncio.sleep(1)
-        with SQLiteModel() as db:
-            for bookID in db.getBookIDs():
-                if db.isBookBorrowed(bookID[0]):
-                    Book.Book(
-                        bookID[0],
-                        db.isBookBorrowed(bookID[0]),
-                        Title.getTitle(db.getBookTitleID(bookID[0])[0]),
-                        Student.getStudent(db.getBookStudentID(bookID[0])[0])
-                    )
-                else:
-                    Book.Book(
-                        bookID[0],
-                        db.isBookBorrowed(bookID[0]),
-                        Title.getTitle(db.getBookTitleID(bookID[0])[0]),
-                    )
-
     """
     Just return no borrowed books onlyBorrowed = false
     If onlyBorrowed = true, only already borrowed books will be returned
@@ -167,7 +149,7 @@ class Controller(unittest.TestCase):
                 amount += 1
         return amount
 
-    async def reloadTable(self):
+    def reloadTable(self):
         if self.mainView.radio_var.get() == 0:
             self.mainView.reloadTable(self.getBooks())
         elif self.mainView.radio_var.get() == 1:
@@ -368,25 +350,13 @@ class Controller(unittest.TestCase):
                     bookID = db.insertExemplar(titleID, str(bookIndex))[-1]
                     books.append(Book.Book(bookID, False, title))
 
-<<<<<<< Updated upstream
-                Book.books = []
-
-            loop = asyncio.get_event_loop()
-
-            loop.run_until_complete(self.loadBooksAsync())
-            loop.run_until_complete(self.reloadTable())
-
-            loop.close()
-
-
-=======
             if self.mainView.radio_var.get() == 0:
                 self.mainView.reloadTable(self.getBooks())
             elif self.mainView.radio_var.get() == 1:
                 self.mainView.reloadTable(self.getBooks(False))
             elif self.mainView.radio_var.get() == 2:
                 self.mainView.reloadTable(self.getBooks(True))
->>>>>>> Stashed changes
+
             values[1].delete(0, 'end')
             values[2].delete(0, 'end')
             values[3].delete(0, 'end')

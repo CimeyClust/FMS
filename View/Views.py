@@ -1,3 +1,4 @@
+import sys
 from functools import partial
 from tkinter.ttk import *
 from email.mime import image
@@ -252,6 +253,7 @@ class MainView(View, customtkinter.CTk):
         # self.check_box_1.configure(state=tkinter.DISABLED, text="CheckBox disabled")
         # self.check_box_2.select()
 
+        self.protocol("WM_DELETE_WINDOW", self.killProgram)
         self.start()
 
 
@@ -481,6 +483,8 @@ class MainView(View, customtkinter.CTk):
         except: pass
 
 
+    def killProgram(self, event = 0):
+        sys.exit(0)
 
     def on_closing(self, event=0):
         self.trigger1=False
