@@ -12,12 +12,16 @@ import asyncio
 from Controller import Controller
 from Controller.CallbackRegister import Callback
 
-global QRIcon
+
 global Bild1
-global searchicon
+global QRIcon
+global trashicon
+global trashiconw
 global plusicon
 global editicon
-
+global QRIconw
+global plusiconw
+global editiconw
 
 # Each View (different Window) should have one own class.
 # By instantiating the class of the view, the old view should close and the new one should appear
@@ -58,9 +62,13 @@ class MainView(View, customtkinter.CTk):
         global QRIcon
         global Bild1
         global style
-        global searchicon
+        global trashicon
+        global trashiconw
         global plusicon
         global editicon
+        global QRIconw
+        global plusiconw
+        global editiconw
 
         super().__init__()
 
@@ -75,11 +83,15 @@ class MainView(View, customtkinter.CTk):
         self.geometry(f"{MainView.WIDTH}x{MainView.HEIGHT}")
         self.minsize(MainView.WIDTH, MainView.HEIGHT)
         # self.minsize(App.WIDTH, App.HEIGHT)
-        QRIcon = PhotoImage(file=f"View\images\qriconsmall.png")
         Bild1 = PhotoImage(file=f"View\images\logo.png")
+        QRIcon = PhotoImage(file=f"View\images\qriconsmall.png")
         editicon = PhotoImage(file=f"View\images\stifticon.png")
-        searchicon = PhotoImage(file=f"View\images\searchicon.png")
+        trashicon = PhotoImage(file=f"View\images\\trashicon.png")
         plusicon = PhotoImage(file=f"View\images\plus.png")
+        QRIconw = PhotoImage(file=f"View\images\qriconsmallw.png")
+        editiconw = PhotoImage(file=f"View\images\stifticonw.png")
+        trashiconw = PhotoImage(file=f"View\images\\trashiconw.png")
+        plusiconw = PhotoImage(file=f"View\images\plusw.png")
         # QRIcon=PhotoImage(file="images/qriconsmall.png")
         # self.protocol("WM_DELETE_WINDOW", self.on_closing)  # call .on_closing() when app gets closed
 
@@ -208,16 +220,16 @@ class MainView(View, customtkinter.CTk):
         #                                        command=self.progressbar.set)
         # self.slider_2.grid(row=5, column=0, columnspan=2, pady=10, padx=20, sticky="we")
 
-        self.slider_button_1 = customtkinter.CTkButton(master=self.frame_right, text="Erstellen", command=self.create, text_color="Black", image=plusicon, fg_color=("gray75", "White"), hover_color="#9c9a9a")
+        self.slider_button_1 = customtkinter.CTkButton(master=self.frame_right, text="Erstellen", command=self.create, text_color=("Black", "#e3e3e3"), image=plusicon, fg_color=("gray75", "gray30"), hover_color="#9c9a9a")
         self.slider_button_1.grid(row=4, column=2, columnspan=1, pady=10, padx=20, sticky="we")
 
-        self.slider_button_2 = customtkinter.CTkButton(master=self.frame_right, text="Bearbeiten", command=lambda: self.control.handleCallback(Callback.TITLE_EDIT_INIT, self.trv), state=tkinter.DISABLED, fg_color="#737373", text_color="Black", image=editicon)
+        self.slider_button_2 = customtkinter.CTkButton(master=self.frame_right, text="Bearbeiten", command=lambda: self.control.handleCallback(Callback.TITLE_EDIT_INIT, self.trv), state=tkinter.DISABLED, fg_color="#737373", text_color=("Black", "#e3e3e3"), image=editicon)
         self.slider_button_2.grid(row=5, column=2, columnspan=1, pady=10, padx=20, sticky="we")
 
-        self.checkbox_button_1 = customtkinter.CTkButton(master=self.frame_right, text="QR-Code erstellen", image=QRIcon, command=lambda: self.control.handleCallback(Callback.CREATE_QRCODE, self.trv), state=tkinter.DISABLED, text_color="Black", fg_color=("gray75", "White"), hover_color="#9c9a9a")
+        self.checkbox_button_1 = customtkinter.CTkButton(master=self.frame_right, text="QR-Code erstellen", image=QRIcon, command=lambda: self.control.handleCallback(Callback.CREATE_QRCODE, self.trv), state=tkinter.DISABLED, text_color=("Black", "#e3e3e3"), fg_color="#737373", hover_color="#9c9a9a")
         self.checkbox_button_1.grid(row=8, column=2, columnspan=1, pady=10, padx=20, sticky="we")
 
-        self.checkbox_button_3 = customtkinter.CTkButton(master=self.frame_right, text="Löschen", command=lambda: self.control.handleCallback(Callback.BOOK_DELETE, self.trv), state=tkinter.DISABLED, text_color="Black", fg_color=("gray75", "White"), hover_color="#9c9a9a")
+        self.checkbox_button_3 = customtkinter.CTkButton(master=self.frame_right, text="Löschen", image=trashiconw, command=lambda: self.control.handleCallback(Callback.BOOK_DELETE, self.trv), state=tkinter.DISABLED, text_color="Black", fg_color="#737373", hover_color="#9c9a9a")
         self.checkbox_button_3.grid(row=6, column=2, columnspan=1, pady=10, padx=20, sticky="we")
 
         self.checkbox_button_2 = customtkinter.CTkButton(master=self.frame_info, text="Ausleihen", command=self.leasing, fg_color="#737373", text_color="Black", state=tkinter.DISABLED)
@@ -232,7 +244,7 @@ class MainView(View, customtkinter.CTk):
         self.entry = customtkinter.CTkEntry(master=self.frame_right, width=120, textvariable=self.sv, placeholder_text="Suchen")
         self.entry.grid(row=8, column=0, columnspan=2, pady=25, padx=20, sticky="we")
 
-        '''self.button_5 = customtkinter.CTkButton(master=self.frame_right, text="Suchen", compound="left", text_color="Black", image=searchicon)
+        '''self.button_5 = customtkinter.CTkButton(master=self.frame_right, text="Suchen", compound="left", text_color="Black", image=trashicon)
         self.button_5.grid(row=11, column=2, columnspan=1, pady=25, padx=20, sticky="we")'''
 
 
@@ -259,21 +271,26 @@ class MainView(View, customtkinter.CTk):
             ttk.Style().map("Treeview.Heading",
                             background=[('pressed', '!focus', "#1e1e1f"), ('active', "#2d2e2e"), ('disabled', "#383838")])
             style.configure("Treeview.Heading", background="#383838", foreground="white")
+            self.slider_button_1.configure(image=plusiconw)
+            self.slider_button_2.configure(image=editiconw)
+            self.checkbox_button_1.configure(image=QRIconw)
         else:
             customtkinter.set_appearance_mode("light")
             style.configure("Treeview", background="#d6d6d6", fieldbackground="#d6d6d6", foreground="black")
             ttk.Style().map("Treeview.Heading",
                             background=[('pressed', '!focus', "#9a9b9c"), ('active', "#bdbebf"), ('disabled', "#383838")])
             style.configure("Treeview.Heading", background="white", foreground="black")
-
+            self.slider_button_1.configure(image=plusicon)
+            self.slider_button_2.configure(image=editicon)
+            self.checkbox_button_1.configure(image=QRIcon)
     def start(self):
         self.mainloop()
 
     def activate(self, placeholder):
-        self.slider_button_2.configure(state=tkinter.NORMAL, fg_color=("gray75", "White"), hover_color="#9c9a9a")
-        self.checkbox_button_1.configure(state=tkinter.NORMAL, fg_color=("gray75", "White"), hover_color="#9c9a9a")
+        self.slider_button_2.configure(state=tkinter.NORMAL, fg_color=("gray75", "gray30"), hover_color="#9c9a9a")
+        self.checkbox_button_1.configure(state=tkinter.NORMAL, fg_color=("gray75", "gray30"), hover_color="#9c9a9a")
         self.checkbox_button_2.configure(fg_color="#38FF88", hover_color="#30d973", state=tkinter.NORMAL)
-        self.checkbox_button_3.configure(fg_color="#ff5e5e", hover_color="#c94949", state=tkinter.NORMAL)
+        self.checkbox_button_3.configure(fg_color="#ff5e5e", hover_color="#c94949", state=tkinter.NORMAL, image=trashicon)
         curItem = self.trv.focus()
         curDict = self.trv.item(curItem)
         value = curDict.get("values")
