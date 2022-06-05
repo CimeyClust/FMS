@@ -189,12 +189,7 @@ class Controller(unittest.TestCase):
                     Subject.subjects.remove(Subject.getSubjectByName(values[0]))
                     self.mainView.updateSubjects(self.getAllSubjectNames())
 
-                if self.mainView.radio_var.get() == 0:
-                    self.mainView.reloadTable(self.getBooks())
-                elif self.mainView.radio_var.get() == 1:
-                    self.mainView.reloadTable(self.getBooks(False))
-                elif self.mainView.radio_var.get() == 2:
-                    self.mainView.reloadTable(self.getBooks(True))
+                self.reloadTable()
             except:
                 pass
 
@@ -347,15 +342,10 @@ class Controller(unittest.TestCase):
 
                 # Create all the books, given in amount
                 for bookIndex in range(0, amount):
-                    bookID = db.insertExemplar(titleID, str(bookIndex))[-1]
-                    books.append(Book.Book(bookID, False, title))
+                    bookID = db.insertExemplar(titleID, str(bookIndex))[-1][0]
+                    Book.Book(bookID, False, title)
 
-            if self.mainView.radio_var.get() == 0:
-                self.mainView.reloadTable(self.getBooks())
-            elif self.mainView.radio_var.get() == 1:
-                self.mainView.reloadTable(self.getBooks(False))
-            elif self.mainView.radio_var.get() == 2:
-                self.mainView.reloadTable(self.getBooks(True))
+            self.reloadTable()
 
             values[1].delete(0, 'end')
             values[2].delete(0, 'end')
@@ -430,12 +420,37 @@ class Controller(unittest.TestCase):
                 oldTitle.subject = subject
 
                 currentAmount = self.getBookAmount(oldTitle)
-                if amount < currentAmount:
+                if amount < 0:
                     return
 
-                for newBookNumber in range(0, (amount - currentAmount)):
-                    bookID = db.insertExemplar(oldTitle.id, str(newBookNumber))[-1]
-                    Book.Book(bookID, False, oldTitle)
+                if currentAmount > amount:
+                    # Search all books, with a lower in priority, which can be deleted
+                    bookPrio1 = []
+                    for book in Book.books:
+                        if book.borrowed:
+                            bookPrio1.append(book)
+
+                    bookPrio2 = []
+                    for book in Book.books:
+                        if not book.borrowed:
+                            bookPrio2.append(book)
+
+                    for newBookNumber in range(0, ((amount - currentAmount) * (-1))):
+                        # bookID = db.insertExemplar(oldTitle.id, str(newBookNumber))[-1]
+                        # Book.Book(bookID, False, oldTitle)
+                        if not bookPrio1 == []:
+                            db.deleteRow("EXEMPLAR", "ExemplarID", bookPrio1[-1].id)
+                            Book.books.remove(bookPrio1[-1])
+                            bookPrio1.remove(bookPrio1[-1])
+                        else:
+                            db.deleteRow("EXEMPLAR", "ExemplarID", bookPrio2[-1].id)
+                            Book.books.remove(bookPrio2[-1])
+                            bookPrio2.remove(bookPrio2[-1])
+
+                if currentAmount < amount:
+                    for newBookNumber in range(0, (amount - currentAmount)):
+                        bookID = db.insertExemplar(oldTitle.id, str(newBookNumber))[-1][0]
+                        Book.Book(bookID, False, oldTitle)
 
             self.reloadTable()
 
