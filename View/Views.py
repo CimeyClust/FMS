@@ -1,3 +1,4 @@
+import sys
 from functools import partial
 from tkinter.ttk import *
 from email.mime import image
@@ -130,7 +131,7 @@ class MainView(View, customtkinter.CTk):
         self.frame_info.rowconfigure(0, weight=1)
         self.frame_info.columnconfigure(0, weight=1)
 
-        self.trv = ttk.Treeview(master=self.frame_info, columns=(1, 2, 3, 4, 5), height=100, selectmode="browse")
+        self.trv = ttk.Treeview(master=self.frame_info, columns=(1, 2, 3, 4, 5, 6), height=100, selectmode="browse")
         style = ttk.Style(self.trv)
         style.theme_use("clam")
         ttk.Style().map("Treeview.Heading", background=[('pressed', '!focus', "#1e1e1f"), ('active', "#2d2e2e"),
@@ -138,12 +139,13 @@ class MainView(View, customtkinter.CTk):
         style.configure("Treeview.Heading", background="#383838", foreground="white")
         style.configure("Treeview", background="#383838", fieldbackground="#383838", foreground="#383838")
         self.trv.grid(column=0, row=0, sticky="nwe", padx=15, pady=15)
-        self.trv.column("#0", anchor="center", stretch="yes", width=1)
+        self.trv.column("#0", anchor="center", stretch="yes", width=0)
         self.trv.column("#1", anchor="center", stretch="yes", width=1)
         self.trv.column("#2", anchor="center", stretch="yes", width=1)
         self.trv.column("#3", anchor="center", stretch="yes", width=1)
         self.trv.column("#4", anchor="center", stretch="yes", width=1)
         self.trv.column("#5", anchor="center", stretch="yes", width=1)
+        self.trv.column("#6", anchor="center", stretch="yes", width=1)
 
         self.trv.heading("#0", text="Buch-ID")
         self.trv.heading("#1", text="Titel")
@@ -151,6 +153,7 @@ class MainView(View, customtkinter.CTk):
         self.trv.heading("#3", text="Autor")
         self.trv.heading("#4", text="Fach")
         self.trv.heading("#5", text="Schüler")
+        self.trv.heading("#6", text="Klasse")
 
         table_scroll = tkinter.Scrollbar(master=self.frame_info, orient='vertical', command=self.trv.yview)
         table_scroll.grid(row=0, column=1, sticky='ns')
@@ -158,10 +161,12 @@ class MainView(View, customtkinter.CTk):
 
         for book, index in zip(values[0][0], range(1, len(values[0][0]) + 2)):
             student = ""
+            group = ""
             if book.student is not None:
                 student = book.student.name + " " + book.student.surname
+                group = book.student.schoolClass
             self.trv.insert(parent='', index='end', iid=index, text=book.id,
-                       values=(book.title.title, book.title.isbn, book.title.author, book.title.subject.subjectTitle, student))
+                       values=(book.title.title, book.title.isbn, book.title.author, book.title.subject.subjectTitle, student, group))
             # command=partial(control.handleCallback, (Callback.ADD_BOOKS_BUTTON, book.id))
 
         self.trv.bind('<<TreeviewSelect>>', self.activate)
@@ -248,6 +253,7 @@ class MainView(View, customtkinter.CTk):
         # self.check_box_1.configure(state=tkinter.DISABLED, text="CheckBox disabled")
         # self.check_box_2.select()
 
+        self.protocol("WM_DELETE_WINDOW", self.killProgram)
         self.start()
 
 
@@ -453,10 +459,12 @@ class MainView(View, customtkinter.CTk):
 
             for book, index in zip(books, range(1, len(books) + 2)):
                 student = ""
+                group = ""
                 if book.student is not None:
                     student = book.student.name + " " + book.student.surname
+                    group = book.student.schoolClass
                 self.trv.insert(parent='', index='end', iid=index, text=book.id,
-                                values=(book.title.title, book.title.isbn, book.title.author, book.title.subject.subjectTitle, student))
+                                values=(book.title.title, book.title.isbn, book.title.author, book.title.subject.subjectTitle, student, group))
         except: pass
 
     def addBookToTable(self, books):
@@ -465,14 +473,18 @@ class MainView(View, customtkinter.CTk):
             if self.radio_var.get() == 0 or self.radio_var.get() == 1:
                 for book, index in zip(books, range(1, len(books) + 2)):
                     student = ""
-                if book.student is not None:
-                    student = book.student.name + " " + book.student.surname
-                self.trv.insert(parent='', index='end', iid=index, text=book.id,
-                                values=(book.title.title, book.title.isbn, book.title.author, book.title.subject.subjectTitle, student))
+                    group = ""
+                    if book.student is not None:
+                        student = book.student.name + " " + book.student.surname
+                        group = book.student.schoolClass
+                    self.trv.insert(parent='', index='end', iid=index, text=book.id,
+                                    values=(book.title.title, book.title.isbn, book.title.author, book.title.subject.subjectTitle, student, group))
 
         except: pass
 
 
+    def killProgram(self, event = 0):
+        sys.exit(0)
 
     def on_closing(self, event=0):
         self.trigger1=False

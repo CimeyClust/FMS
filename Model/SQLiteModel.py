@@ -276,7 +276,7 @@ class SQLiteModel(object):
         )
         self.cursor.execute(
             f"SELECT ExemplarID FROM EXEMPLAR WHERE TitelID = {titel_id} AND Bemerkung = '{bemerkung}'")
-        return self.cursor.fetchone()
+        return self.cursor.fetchall()
 
     def insertTitel(self, fachbereichs_id: int, titelname: str, autor: str, isbn: str):
         self.cursor.execute(

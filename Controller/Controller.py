@@ -149,6 +149,14 @@ class Controller(unittest.TestCase):
                 amount += 1
         return amount
 
+    def reloadTable(self):
+        if self.mainView.radio_var.get() == 0:
+            self.mainView.reloadTable(self.getBooks())
+        elif self.mainView.radio_var.get() == 1:
+            self.mainView.reloadTable(self.getBooks(False))
+        elif self.mainView.radio_var.get() == 2:
+            self.mainView.reloadTable(self.getBooks(True))
+
     """
     Handles the callbacks of the view
     """
@@ -242,12 +250,7 @@ class Controller(unittest.TestCase):
             isBorrowed = curItem.get("values")
             self.mainView.reloadLeasingReturnButton(isBorrowed)
 
-            if self.mainView.radio_var.get() == 0:
-                self.mainView.reloadTable(self.getBooks())
-            elif self.mainView.radio_var.get() == 1:
-                self.mainView.reloadTable(self.getBooks(False))
-            elif self.mainView.radio_var.get() == 2:
-                self.mainView.reloadTable(self.getBooks(True))
+            self.reloadTable()
 
         elif callbackType == Callback.RETURN_BOOK:
             with SQLiteModel() as db:
@@ -282,12 +285,7 @@ class Controller(unittest.TestCase):
                     command=self.mainView.leasing
                 )
 
-            if self.mainView.radio_var.get() == 0:
-                self.mainView.reloadTable(self.getBooks())
-            elif self.mainView.radio_var.get() == 1:
-                self.mainView.reloadTable(self.getBooks(False))
-            elif self.mainView.radio_var.get() == 2:
-                self.mainView.reloadTable(self.getBooks(True))
+            self.reloadTable()
 
         elif callbackType == Callback.SEARCH:
             content = values[0].get()
@@ -298,7 +296,7 @@ class Controller(unittest.TestCase):
             for book in Book.books:
                 if book.student is None:
                     if content.isnumeric():
-                        if 10 < int(content):
+                        if 1000 < int(content):
                             if content in book.title.title or content in book.title.author or content in book.title.isbn \
                                     or int(content) == book.id:
                                 matchedBooks.append(book)
@@ -309,10 +307,11 @@ class Controller(unittest.TestCase):
                             matchedBooks.append(book)
                 else:
                     if content.isnumeric():
-                        if 10 < int(content):
+                        if 1000 < int(content):
                             if content in book.title.title or content in book.student.surname or \
                                     content in book.student.name or content in book.student.schoolClass or \
-                                    content in book.title.author or content in book.title.isbn or int(content) == book.id:
+                                    content in book.title.author or content in book.title.isbn or int(
+                                content) == book.id:
                                 matchedBooks.append(book)
                         else:
                             if int(content) == book.id:
@@ -348,10 +347,8 @@ class Controller(unittest.TestCase):
 
                 # Create all the books, given in amount
                 for bookIndex in range(0, amount):
-                    bookID = db.insertExemplar(titleID, str(bookIndex))[0]
+                    bookID = db.insertExemplar(titleID, str(bookIndex))[-1]
                     books.append(Book.Book(bookID, False, title))
-
-                Book.books = []
 
             if self.mainView.radio_var.get() == 0:
                 self.mainView.reloadTable(self.getBooks())
@@ -359,6 +356,7 @@ class Controller(unittest.TestCase):
                 self.mainView.reloadTable(self.getBooks(False))
             elif self.mainView.radio_var.get() == 2:
                 self.mainView.reloadTable(self.getBooks(True))
+
             values[1].delete(0, 'end')
             values[2].delete(0, 'end')
             values[3].delete(0, 'end')
@@ -378,19 +376,16 @@ class Controller(unittest.TestCase):
         elif callbackType == Callback.BOOK_DELETE:
             curItemID = values[0].focus()
             curItem = values[0].item(curItemID)
-            try: bookID = int(curItem.get("text"))
-            except: return
+            try:
+                bookID = int(curItem.get("text"))
+            except:
+                return
 
             with SQLiteModel() as db:
                 db.deleteRow("EXEMPLAR", "ExemplarID", bookID)
                 Book.books.remove(Book.getBook(bookID))
 
-            if self.mainView.radio_var.get() == 0:
-                self.mainView.reloadTable(self.getBooks())
-            elif self.mainView.radio_var.get() == 1:
-                self.mainView.reloadTable(self.getBooks(False))
-            elif self.mainView.radio_var.get() == 2:
-                self.mainView.reloadTable(self.getBooks(True))
+            self.reloadTable()
 
             # Set focus back
             newIndex = (int(curItemID) - 1)
@@ -439,22 +434,13 @@ class Controller(unittest.TestCase):
                     return
 
                 for newBookNumber in range(0, (amount - currentAmount)):
-                    bookID = db.insertExemplar(oldTitle.id, str(newBookNumber))[0]
+                    bookID = db.insertExemplar(oldTitle.id, str(newBookNumber))[-1]
                     Book.Book(bookID, False, oldTitle)
 
-            if self.mainView.radio_var.get() == 0:
-                self.mainView.reloadTable(self.getBooks())
-            elif self.mainView.radio_var.get() == 1:
-                self.mainView.reloadTable(self.getBooks(False))
-            elif self.mainView.radio_var.get() == 2:
-                self.mainView.reloadTable(self.getBooks(True))
+            self.reloadTable()
 
             self.mainView.editwindow.after(100, self.mainView.editwindow.destroy)
             self.mainView.trigger1 = False
-
-
-
-
 
     def createTestDatabaseInput(self):
         with SQLiteModel() as db:
