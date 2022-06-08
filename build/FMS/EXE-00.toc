@@ -2,7 +2,7 @@
  False,
  False,
  True,
- 'C:\\Users\\alter\\Documents\\Schule\\Informatik-LK\\Projekte\\FMS\\venv\\lib\\site-packages\\PyInstaller\\bootloader\\images\\icon-windowed.ico',
+ 'C:\\Users\\alter\\Documents\\Schule\\Informatik-LK\\Projekte\\FMS\\View\\images\\logo.ico',
  None,
  False,
  False,
@@ -59,7 +59,7 @@
  [],
  False,
  False,
- 1654701214,
+ 1654705155,
  [('runw.exe',
    'C:\\Users\\alter\\Documents\\Schule\\Informatik-LK\\Projekte\\FMS\\venv\\lib\\site-packages\\PyInstaller\\bootloader\\Windows-64bit\\runw.exe',
    'EXECUTABLE')])
