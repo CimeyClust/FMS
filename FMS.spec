@@ -8,7 +8,7 @@ a = Analysis(
     ['FMS.py'],
     pathex=['venv/Lib/site-packages/'],
     binaries=[],
-    datas=[('venv/Lib/site-packages/customtkinter', 'customtkinter/'), ('View/images/*.png', 'View/images')],
+    datas=[('venv/Lib/site-packages/customtkinter', 'customtkinter/'), ('View/images/*.png', 'View/images'), ('View/images/*.ico', 'View/images')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -37,6 +37,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+    icon='View\\images\\logo.ico',
 )
 coll = COLLECT(
     exe,

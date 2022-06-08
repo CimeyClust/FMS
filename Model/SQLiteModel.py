@@ -35,7 +35,8 @@ class SQLiteModel(object):
     #######################################################################
 
     def __init__(self):
-        self.connection = sql.connect('fms.db')
+        # self.connection = sql.connect(os.getcwd() + '\\fms.db')
+        self.connection = sql.connect(f'{os.getenv("LOCALAPPDATA")}\\fms.db')
         self.cursor = self.connection.cursor()
         self.createTable()
 

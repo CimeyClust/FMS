@@ -82,6 +82,8 @@ class MainView(View, customtkinter.CTk):
         self.geometry(f"{MainView.WIDTH}x{MainView.HEIGHT}")
         self.minsize(MainView.WIDTH, MainView.HEIGHT)
         # self.minsize(App.WIDTH, App.HEIGHT)
+        # Set icons
+        self.iconbitmap(f"View\images\logo.ico")
         Bild1 = PhotoImage(file=f"View\images\logo.png")
         QRIcon = PhotoImage(file=f"View\images\qriconsmall.png")
         editicon = PhotoImage(file=f"View\images\stifticon.png")
