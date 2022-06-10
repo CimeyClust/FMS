@@ -697,6 +697,7 @@ class MainView(View, customtkinter.CTk):
         except:
             pass
 
+
     def killProgram(self, event=0):
         sys.exit(0)
 
@@ -715,7 +716,7 @@ class MainView(View, customtkinter.CTk):
             pass
 
     def on_closing3(self, event=0):
-        self.trigger = False
+        self.trigger1 = False
         try:
             self.leasingwindow.after(100, self.leasingwindow.destroy)
         except:
@@ -746,3 +747,11 @@ class MainView(View, customtkinter.CTk):
     # Hide the current view and disable it
     def killView(self):
         pass
+
+def displayPopup(title: str, message: str):
+    root = tkinter.Tk()
+    root.overrideredirect(1)
+    root.withdraw()
+    popup = tkinter.messagebox.showinfo(title=title, message=message)
+    root.destroy()
+    return popup

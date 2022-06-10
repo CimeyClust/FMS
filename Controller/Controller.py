@@ -4,7 +4,7 @@
 # Program made by Jan, Sinan and Leon for the FMS project.
 #
 ###########################################################################
-
+import asyncio
 import datetime
 import sys
 import tkinter
@@ -12,6 +12,7 @@ import traceback
 
 from mysql.connector import DatabaseError
 
+from View import Views
 from Controller.CallbackRegister import Callback
 from Controller.ViewHandler import ViewHandler
 from Controller.ViewRegister import ViewRegister
@@ -26,7 +27,11 @@ class Controller:
     def __init__(self, args=None):
         if args is None:
             args = []
-        self.sqliteModel = SQLiteModel()
+
+        # Creates an async event loop for receiving database data
+        # self.mainLoop = asyncio.new_event_loop()
+
+
         # Create test database input at beginning
         # self.createTestDatabaseInput()
 
@@ -35,21 +40,22 @@ class Controller:
 
         # Load access data for the Remote Database
         with SQLiteModel() as db:
-            self.host = db.getConnectionHost(1)[0]
-            self.user = db.getConnectionUser(1)[0]
-            self.password = db.getConnectionPassword(1)[0]
-            self.database = db.getConnectionDatabase(1)[0]
+            self.host = db.getConnectionHost(1)
+            self.user = db.getConnectionUser(1)
+            self.password = db.getConnectionPassword(1)
+            self.database = db.getConnectionDatabase(1)
 
-        print(self.host)
-        print(self.user)
-        print(self.password)
-        print(self.database)
         if self.host is None or self.user is None or self.password is None or self.database is None:
             with SQLiteModel() as db:
                 db.insertEmptyConnection(1)
             self.mainView = ViewRegister.MAIN_VIEW.value()
             self.viewHandler = ViewHandler(self.mainView, self, (self.getBooks(), self.getAllSubjectNames, True))
             return
+
+        self.host = self.host[0]
+        self.user = self.user[0]
+        self.password = self.password[0]
+        self.database = self.database[0]
 
         # Load data
         try:
@@ -197,13 +203,12 @@ class Controller:
                 try:
                     db.updateConnection(1, values[0].get(), values[1].get(), values[2].get(), values[3].get())
                 except DatabaseError as error:
-
                     print(error)
             self.mainView.connectionwindow.after(100, self.mainView.connectionwindow.destroy)
             Controller()
         elif callbackType == Callback.ADD_SUBJECT:
             with MySQLModel(self.host, self.user, self.password, self.database) as db:
-                subjectID = db.insertFachbereich(values[0].get())
+                subjectID = db.resolve(db.insertFachbereich, values[0].get())
                 Subject.Subject(int(subjectID[0]), values[0].get())
                 self.mainView.updateSubjects(self.getAllSubjectNames())
             values[0].delete(0, 'end')
@@ -218,7 +223,7 @@ class Controller:
                     book = Book.books[i]
                     if book.title.subject == subject:
                         with MySQLModel(self.host, self.user, self.password, self.database) as db:
-                            db.deleteRow("EXEMPLAR", "ExemplarID", book.id)
+                            db.resolve(db.deleteRow, "EXEMPLAR", "ExemplarID", book.id)
                         removedBooks.append(book)
 
                 [Book.books.remove(book) for book in removedBooks]
@@ -229,7 +234,7 @@ class Controller:
                         Title.titles.remove(title)
 
                 with MySQLModel(self.host, self.user, self.password, self.database) as db:
-                    db.deleteRow("FACHBEREICH", "FachbereichsID", subject.id)
+                    db.resolve(db.deleteRow, "FACHBEREICH", "FachbereichsID", subject.id)
                     Subject.subjects.remove(Subject.getSubjectByName(values[0]))
                     self.mainView.updateSubjects(self.getAllSubjectNames())
 
@@ -256,7 +261,7 @@ class Controller:
             with MySQLModel(self.host, self.user, self.password, self.database) as db:
                 student = Student.getStudentByAttributes(values[0], values[1], values[2])
                 if student is None:
-                    studentID = db.insertSchueler(values[0], values[1], values[2])[0]
+                    studentID = db.resolve(db.insertSchueler, values[0], values[1], values[2])[0]
                     student = Student.Student(studentID, values[0], values[1], values[2])
 
                 curItemID = values[3].focus()
@@ -267,7 +272,8 @@ class Controller:
                 book.student = student
                 book.borrowed = True
 
-                db.insertAusleihe(
+                db.resolve(
+                    db.insertAusleihe,
                     student.id,
                     bookID,
                     datetime.date.today()
@@ -313,7 +319,7 @@ class Controller:
                 book = Book.getBook(bookID)
 
                 borrowID = db.getAusleiheID(student.id, bookID)[0]
-                db.deleteRow("AUSLEIHE", "VorgangsID", borrowID)
+                db.resolve(db.deleteRow, "AUSLEIHE", "VorgangsID", borrowID)
 
                 book.student = None
                 book.borrowed = False
@@ -367,7 +373,6 @@ class Controller:
             self.mainView.reloadTable(matchedBooks)
 
         elif callbackType == Callback.TITLE_CREATE:
-            print("Test")
             subject = Subject.getSubjectByName(values[0].get())
             titleName = values[1].get()
             isbn = values[2].get()
@@ -385,13 +390,13 @@ class Controller:
 
             books = []
             with MySQLModel(self.host, self.user, self.password, self.database) as db:
-                titleID = db.insertTitel(subject.id, titleName, author, isbn)[0]
+                titleID = db.resolve(db.insertTitel, subject.id, titleName, author, isbn)[0]
                 title = Title.Title(titleID, titleName, isbn, author, subject)
 
                 # Create all the books, given in amount
                 for bookIndex in range(0, amount):
                     note = (str(bookIndex) + str(title.id))
-                    bookID = db.insertExemplar(titleID, "")[-1][0]
+                    bookID = db.resolve(db.insertExemplar, titleID, "")[-1][0]
                     Book.Book(bookID, False, title)
 
             self.reloadTable()
@@ -422,7 +427,7 @@ class Controller:
                 return
 
             with MySQLModel(self.host, self.user, self.password, self.database) as db:
-                db.deleteRow("EXEMPLAR", "ExemplarID", bookID)
+                db.resolve(db.deleteRow, "EXEMPLAR", "ExemplarID", bookID)
                 Book.books.remove(Book.getBook(bookID))
 
             self.reloadTable()
@@ -462,7 +467,7 @@ class Controller:
                 oldTitle = Title.getTitleByNameAndISBN(titleNameBefore, isbnBefore)
 
                 # Update database
-                db.updateTitle(oldTitle.id, titleName, isbn, author, subject.id)
+                db.resolve(db.updateTitle, oldTitle.id, titleName, isbn, author, subject.id)
 
                 # Update title instances
                 oldTitle.title = titleName
@@ -490,17 +495,17 @@ class Controller:
                         # bookID = db.insertExemplar(oldTitle.id, str(newBookNumber))[-1]
                         # Book.Book(bookID, False, oldTitle)
                         if not bookPrio1 == []:
-                            db.deleteRow("EXEMPLAR", "ExemplarID", bookPrio1[-1].id)
+                            db.resolve(db.deleteRow, "EXEMPLAR", "ExemplarID", bookPrio1[-1].id)
                             Book.books.remove(bookPrio1[-1])
                             bookPrio1.remove(bookPrio1[-1])
                         else:
-                            db.deleteRow("EXEMPLAR", "ExemplarID", bookPrio2[-1].id)
+                            db.resolve(db.deleteRow, "EXEMPLAR", "ExemplarID", bookPrio2[-1].id)
                             Book.books.remove(bookPrio2[-1])
                             bookPrio2.remove(bookPrio2[-1])
 
                 if currentAmount < amount:
                     for newBookNumber in range(0, (amount - currentAmount)):
-                        bookID = db.insertExemplar(oldTitle.id, "")[-1][0]
+                        bookID = db.resolve(db.insertExemplar, oldTitle.id, "")[-1][0]
                         Book.Book(bookID, False, oldTitle)
 
             self.reloadTable()

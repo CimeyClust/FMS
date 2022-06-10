@@ -6,6 +6,9 @@
 ###########################################################################
 
 # import sqlite3 as sql
+import asyncio
+import tkinter.filedialog
+
 import pandas as pd
 import datetime
 import os
@@ -56,7 +59,7 @@ class MySQLModel(object):
             }
         self.connection = sql.connect(**mysql_config)
         self.cursor = self.connection.cursor()
-        self.createTable()
+        self.resolve(self.createTable)
 
     #######################################################################
     #
@@ -67,7 +70,7 @@ class MySQLModel(object):
     #
     #######################################################################
 
-    def createTable(self):
+    async def createTable(self):
         # Creating SQL queries for the table generation
         table_schueler = """ CREATE TABLE IF NOT EXISTS `SCHUELER` ( 
                                 `SchuelerID` INT NOT NULL AUTO_INCREMENT , 
@@ -292,7 +295,7 @@ class MySQLModel(object):
     #
     #######################################################################
 
-    def insertSchueler(self, vorname: str, nachname: str, klasse: str):
+    async def insertSchueler(self, vorname: str, nachname: str, klasse: str):
         self.cursor.execute(
             "INSERT INTO SCHUELER (Vorname, Nachname, Klasse) "
             "VALUES (%s, %s, %s);", (vorname, nachname, klasse)
@@ -301,7 +304,7 @@ class MySQLModel(object):
             f"SELECT SchuelerID FROM SCHUELER WHERE Vorname = '{vorname}' AND Nachname = '{nachname}' AND Klasse = '{klasse}';")
         return self.cursor.fetchone()
 
-    def insertAusleihe(self, student_id: int, exemplar_id: int, datum_entleihe: datetime):
+    async def insertAusleihe(self, student_id: int, exemplar_id: int, datum_entleihe: datetime):
         self.cursor.execute(
             "INSERT INTO AUSLEIHE (SchuelerID, ExemplarID, DatumEntleihe) "
             "VALUES (%s, %s, %s);", (student_id, exemplar_id, datum_entleihe)
@@ -315,7 +318,7 @@ class MySQLModel(object):
             f"SELECT VorgangsID FROM AUSLEIHE WHERE SchuelerID = {student_id} AND ExemplarID = {exemplar_id} ")
         return self.cursor.fetchone()
 
-    def insertExemplar(self, titel_id: int, bemerkung: str):
+    async def insertExemplar(self, titel_id: int, bemerkung: str):
         self.cursor.execute(
             "INSERT INTO EXEMPLAR (TitelID, Bemerkung) VALUES (%s, %s);", (titel_id, bemerkung)
         )
@@ -323,7 +326,7 @@ class MySQLModel(object):
             f"SELECT ExemplarID FROM EXEMPLAR WHERE TitelID = {titel_id} AND Bemerkung = '{bemerkung}'")
         return self.cursor.fetchall()
 
-    def insertTitel(self, fachbereichs_id: int, titelname: str, autor: str, isbn: str):
+    async def insertTitel(self, fachbereichs_id: int, titelname: str, autor: str, isbn: str):
         self.cursor.execute(
             "INSERT INTO TITEL (FachbereichsID, Titelname, Autor, ISBN) "
             "VALUES (%s, %s, %s, %s);", (fachbereichs_id, titelname, autor, isbn)
@@ -333,7 +336,7 @@ class MySQLModel(object):
         )
         return self.cursor.fetchone()
 
-    def insertFachbereich(self, fachbereichsname: str):
+    async def insertFachbereich(self, fachbereichsname: str):
         self.cursor.execute(
             "INSERT INTO FACHBEREICH (Fachbereichsname) "
             "VALUES (%s);", (fachbereichsname,)
@@ -345,13 +348,13 @@ class MySQLModel(object):
 
     # UPDATE
 
-    def updateTitle(self, titleID: int, titleName: str, isbn: str, author: str, subjectID: int):
+    async def updateTitle(self, titleID: int, titleName: str, isbn: str, author: str, subjectID: int):
         statement = f"UPDATE TITEL SET Titelname = '{titleName}', Autor = '{author}', ISBN = '{isbn}', FachbereichsID = {subjectID} WHERE TitelID = {titleID};"
         self.cursor.execute(statement)
 
     # DELETE
 
-    def deleteRow(self, table_name: str, tableIDColumn: str, row_id: int):
+    async def deleteRow(self, table_name: str, tableIDColumn: str, row_id: int):
         statement = f"DELETE FROM {table_name} WHERE {tableIDColumn} = {row_id};"
         self.cursor.execute(statement)
 
@@ -366,7 +369,7 @@ class MySQLModel(object):
     #
     #######################################################################
 
-    def executeQuery(self, query):
+    async def executeQuery(self, query):
         self.cursor.execute(query)
 
     #######################################################################
@@ -414,7 +417,18 @@ class MySQLModel(object):
         qr.make(fit=True)
 
         img = qr.make_image(fill_color="black", back_color="white")
-        img.save(os.getcwd() + "\\Book" + str(id) + ".png")
+        path = tkinter.filedialog.askdirectory(initialdir=os.path.expanduser("~"))
+        try: img.save(path + "\\Books\\Book" + str(id) + ".png")
+        except OSError:
+            os.mkdir(path + "\\Books")
+            img.save(path + "\\Books\\Book" + str(id) + ".png")
+
+    def resolve(self, method, *args):
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        result = loop.run_until_complete(method(*args))
+        return result
+
 
 if __name__ == "__main__":
     os.remove("fms.db")
