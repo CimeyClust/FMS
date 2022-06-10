@@ -48,13 +48,14 @@ class MainView(View, customtkinter.CTk):
     def initView(self, control: Controller, *values):
         '''
         Values:
-        Title: value[0].title.title
-        isbn: value[0].title.isbn
-        autor: value[0].title.author
-        subject: value[0].title.subject.subjectTitle
-        student: value[0].student.name + " " + value.student.surName
+        Title: values[0].title.title
+        isbn: values[0].title.isbn
+        autor: values[0].title.author
+        subject: values[0].title.subject.subjectTitle
+        student: values[0].student.name + " " + value.student.surName
 
-        fachbreichsnamen: value[1]
+        fachbereichsnamen: values[1]
+        HatDatenbank?: values[2]
 
         Callbacks:
 
@@ -71,15 +72,19 @@ class MainView(View, customtkinter.CTk):
         global plusiconw
         global editiconw
 
+        self.control = control
+        if values[0][2]:
+            self.setupconnection()
+
         super().__init__()
 
         self.trigger1 = False
         self.trigger2 = False
         self.placeholder = "rüherei"
         self.values = values[0]
-        self.control = control
         self.title("Fachwerk Management System")
         self.geometry(f"{MainView.WIDTH}x{MainView.HEIGHT}")
+        self.state("zoomed")
         self.minsize(MainView.WIDTH, MainView.HEIGHT)
         # self.minsize(App.WIDTH, App.HEIGHT)
         # Set icons
@@ -181,8 +186,8 @@ class MainView(View, customtkinter.CTk):
                 group = book.student.schoolClass
             self.trv.insert(parent='', index='end', iid=index, text=book.id,
                             values=(
-                            book.title.title, book.title.isbn, book.title.author, book.title.subject.subjectTitle,
-                            student, group))
+                                book.title.title, book.title.isbn, book.title.author, book.title.subject.subjectTitle,
+                                student, group))
             # command=partial(control.handleCallback, (Callback.ADD_BOOKS_BUTTON, book.id))
 
         self.trv.bind('<<TreeviewSelect>>', self.activate)
@@ -418,12 +423,15 @@ class MainView(View, customtkinter.CTk):
         curItem = self.trv.item(curItemID)
         curDict = curItem.get("values")
         self.trigger1 = True
-        self.editwindow = customtkinter.CTk()
-        windowtitle = (curDict[0] + " ausleihen")
-        self.editwindow.title(windowtitle)
-        self.editwindow.geometry('780x320')
-        self.editwindow.resizable(0, 0)
-        self.frame_input = customtkinter.CTkFrame(master=self.editwindow)
+        self.leasingwindow = customtkinter.CTk()
+        try:
+            windowtitle = (curDict[0] + " ausleihen")
+        except:
+            return
+        self.leasingwindow.title(windowtitle)
+        self.leasingwindow.geometry('780x320')
+        self.leasingwindow.resizable(0, 0)
+        self.frame_input = customtkinter.CTkFrame(master=self.leasingwindow)
         self.frame_input.grid(row=0, column=0, columnspan=4, rowspan=6, pady=20, padx=20, sticky="nsew")
 
         self.name = customtkinter.CTkLabel(master=self.frame_input, anchor=tkinter.W, justify=tkinter.LEFT,
@@ -450,7 +458,8 @@ class MainView(View, customtkinter.CTk):
         self.groupentry = customtkinter.CTkEntry(master=self.frame_input, width=500)
         self.groupentry.grid(row=2, column=4, columnspan=3, pady=20, padx=20, sticky="nesw")
 
-        self.finish = customtkinter.CTkButton(self.editwindow, text="Fertig", fg_color="#38FF88", hover_color="#30d973",
+        self.finish = customtkinter.CTkButton(self.leasingwindow, text="Fertig", fg_color="#38FF88",
+                                              hover_color="#30d973",
                                               text_color="Black",
                                               command=lambda: self.control.handleCallback(Callback.BORROW_BOOK,
                                                                                           self.nameentry.get(),
@@ -462,11 +471,11 @@ class MainView(View, customtkinter.CTk):
                                                                                                           pady=10,
                                                                                                           padx=20,
                                                                                                           sticky="nesw")
-        self.stop = customtkinter.CTkButton(self.editwindow, text="Abbrechen", fg_color="#ff5e5e",
+        self.stop = customtkinter.CTkButton(self.leasingwindow, text="Abbrechen", fg_color="#ff5e5e",
                                             hover_color="#c94949", text_color="Black", command=self.on_closing).grid(
             row=7, column=1, columnspan=1, pady=10, padx=20, sticky="nesw")
-        self.editwindow.protocol("WM_DELETE_WINDOW", self.on_closing)
-        self.editwindow.mainloop()
+        self.leasingwindow.protocol("WM_DELETE_WINDOW", self.on_closing3)
+        self.leasingwindow.mainloop()
 
     def create(self):
         if self.trigger1: return
@@ -498,7 +507,7 @@ class MainView(View, customtkinter.CTk):
         self.subject_cb2 = ttk.Combobox(master=self.frame_input, textvariable=self.selected_subject)
         self.subject_cb2.grid(row=1, column=1, columnspan=10, pady=20, padx=20, sticky="nesw")
         self.subject_cb2['state'] = 'readonly'
-        self.subject_cb2['values'] = self.values[1]
+        self.subject_cb2['values'] = self.values[1]()
         try:
             self.subject_cb2.current(0)
         except:
@@ -581,7 +590,7 @@ class MainView(View, customtkinter.CTk):
         self.subject_cb1 = ttk.Combobox(master=self.frame_input1, textvariable=self.selected_subject1)
         self.subject_cb1.grid(row=3, column=0, columnspan=3, pady=(10, 20), padx=(30, 10), sticky="nesw")
         self.subject_cb1['state'] = 'readonly'
-        self.subject_cb1['values'] = self.values[1]
+        self.subject_cb1['values'] = self.values[1]()
         try:
             self.subject_cb1.current(0)
         except:
@@ -599,6 +608,60 @@ class MainView(View, customtkinter.CTk):
         self.subjectwindow.protocol("WM_DELETE_WINDOW", self.on_closing2)
         self.subjectwindow.mainloop()
 
+    def setupconnection(self, host="", user="", database=""):
+        self.connectionwindow = customtkinter.CTk()
+        self.connectionwindow.title('Datenbank Verbindung einstellen')
+        self.connectionwindow.geometry('1000x450')
+        self.connectionwindow.resizable(0, 0)
+        self.frame_input = customtkinter.CTkFrame(master=self.connectionwindow)
+        self.frame_input.grid(row=0, column=0, columnspan=4, rowspan=6, pady=20, padx=20, sticky="nsew")
+        # self.frame_input.grid_remove()
+
+        self.host = customtkinter.CTkLabel(master=self.frame_input, anchor=tkinter.W, justify=tkinter.LEFT,
+                                           text="Host:", text_font='Arial 13').grid(row=1, column=0, columnspan=1,
+                                                                                    pady=20, padx=0, sticky="w")
+        self.hostentry = customtkinter.CTkEntry(master=self.frame_input, width=120)
+        self.hostentry.grid(row=1, column=4, columnspan=3, pady=20, padx=20, sticky="nesw")
+
+        self.user = customtkinter.CTkLabel(master=self.frame_input, anchor=tkinter.W, justify=tkinter.LEFT,
+                                           text="Username:", text_font='Arial 13').grid(row=2, column=0, columnspan=1,
+                                                                                        pady=20, padx=0, sticky="w")
+        self.userentry = customtkinter.CTkEntry(master=self.frame_input, width=120)
+        self.userentry.grid(row=2, column=4, columnspan=3, pady=20, padx=20, sticky="nesw")
+
+        self.password = customtkinter.CTkLabel(master=self.frame_input, anchor=tkinter.W, justify=tkinter.LEFT,
+                                               text="Passwort:", text_font='Arial 13').grid(row=3, column=0,
+                                                                                            columnspan=1,
+                                                                                            pady=20, padx=0, sticky="w")
+        self.passwordentry = customtkinter.CTkEntry(master=self.frame_input, show="●", width=120)
+        self.passwordentry.grid(row=3, column=4, columnspan=3, pady=20, padx=20, sticky="nesw")
+
+        self.database = customtkinter.CTkLabel(master=self.frame_input, anchor=tkinter.W, justify=tkinter.LEFT,
+                                               text="Datenbank:", text_font='Arial 13').grid(row=4, column=0,
+                                                                                             columnspan=1, pady=20,
+                                                                                             padx=0, sticky="w")
+        self.databaseentry = customtkinter.CTkEntry(master=self.frame_input, width=790)
+        self.databaseentry.grid(row=4, column=4, columnspan=3, pady=20, padx=20, sticky="nesw")
+
+        self.finish = customtkinter.CTkButton(self.connectionwindow, text="Speichern", fg_color="#38FF88",
+                                              hover_color="#30d973", text_color="Black",
+                                              command=lambda: self.control.handleCallback(Callback.ADD_DB_CONNECTION,
+                                                                                          self.hostentry,
+                                                                                          self.userentry,
+                                                                                          self.passwordentry,
+                                                                                          self.databaseentry)).grid(
+            row=7, column=2, columnspan=1, pady=10, padx=20, sticky="nesw")
+        self.stop = customtkinter.CTkButton(self.connectionwindow, text="Abbrechen", fg_color="#ff5e5e",
+                                            hover_color="#c94949", text_color="Black",
+                                            command=self.killProgram).grid(row=7, column=1, columnspan=1, pady=10,
+                                                                          padx=20, sticky="nesw")
+
+        self.hostentry.insert(0, host)
+        self.userentry.insert(0, user)
+        self.databaseentry.insert(0, database)
+        self.connectionwindow.protocol("WM_DELETE_WINDOW", self.killProgram)
+        self.connectionwindow.mainloop()
+
     def reloadTable(self, books):
         try:
             for row in self.trv.get_children():
@@ -612,8 +675,9 @@ class MainView(View, customtkinter.CTk):
                     group = book.student.schoolClass
                 self.trv.insert(parent='', index='end', iid=index, text=book.id,
                                 values=(
-                                book.title.title, book.title.isbn, book.title.author, book.title.subject.subjectTitle,
-                                student, group))
+                                    book.title.title, book.title.isbn, book.title.author,
+                                    book.title.subject.subjectTitle,
+                                    student, group))
         except:
             pass
 
@@ -633,6 +697,7 @@ class MainView(View, customtkinter.CTk):
         except:
             pass
 
+
     def killProgram(self, event=0):
         sys.exit(0)
 
@@ -640,7 +705,6 @@ class MainView(View, customtkinter.CTk):
         self.trigger1 = False
         try:
             self.editwindow.after(100, self.editwindow.destroy)
-            self.subjectwindow.after_cancel()
         except:
             pass
 
@@ -648,6 +712,13 @@ class MainView(View, customtkinter.CTk):
         self.trigger2 = False
         try:
             self.subjectwindow.after(100, self.subjectwindow.destroy)
+        except:
+            pass
+
+    def on_closing3(self, event=0):
+        self.trigger1 = False
+        try:
+            self.leasingwindow.after(100, self.leasingwindow.destroy)
         except:
             pass
 
@@ -676,3 +747,11 @@ class MainView(View, customtkinter.CTk):
     # Hide the current view and disable it
     def killView(self):
         pass
+
+def displayPopup(title: str, message: str):
+    root = tkinter.Tk()
+    root.overrideredirect(1)
+    root.withdraw()
+    popup = tkinter.messagebox.showinfo(title=title, message=message)
+    root.destroy()
+    return popup

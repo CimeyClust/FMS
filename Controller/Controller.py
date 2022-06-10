@@ -4,25 +4,33 @@
 # Program made by Jan, Sinan and Leon for the FMS project.
 #
 ###########################################################################
-
 import asyncio
 import datetime
-import time
+import sys
 import tkinter
+import traceback
 
+from mysql.connector import DatabaseError
+
+from View import Views
 from Controller.CallbackRegister import Callback
 from Controller.ViewHandler import ViewHandler
 from Controller.ViewRegister import ViewRegister
 from Model import Book, Subject, Student
+from Model.MySQLModel import MySQLModel
 from Model.SQLiteModel import SQLiteModel
 from Model import Title
 import unittest
 
 
-class Controller(unittest.TestCase):
-    def __init__(self, args):
-        # Model
-        self.model = SQLiteModel()
+class Controller:
+    def __init__(self, args=None):
+        if args is None:
+            args = []
+
+        # Creates an async event loop for receiving database data
+        # self.mainLoop = asyncio.new_event_loop()
+
 
         # Create test database input at beginning
         # self.createTestDatabaseInput()
@@ -30,11 +38,39 @@ class Controller(unittest.TestCase):
         # Register listener for book deletion
         # asyncio.run(KeyListener.registerTask())
 
+        # Load access data for the Remote Database
+        with SQLiteModel() as db:
+            self.host = db.getConnectionHost(1)
+            self.user = db.getConnectionUser(1)
+            self.password = db.getConnectionPassword(1)
+            self.database = db.getConnectionDatabase(1)
+
+        if self.host is None or self.user is None or self.password is None or self.database is None:
+            with SQLiteModel() as db:
+                db.insertEmptyConnection(1)
+            self.mainView = ViewRegister.MAIN_VIEW.value()
+            self.viewHandler = ViewHandler(self.mainView, self, (self.getBooks(), self.getAllSubjectNames, True))
+            return
+
+        self.host = self.host[0]
+        self.user = self.user[0]
+        self.password = self.password[0]
+        self.database = self.database[0]
+
         # Load data
-        self.loadSubjects()
-        self.loadTitles()
-        self.loadStudents()
-        self.loadBooks()
+        try:
+            self.loadSubjects()
+            self.loadTitles()
+            self.loadStudents()
+            self.loadBooks()
+        except DatabaseError as error:
+            print(traceback.format_exc())
+            if self.host is None or self.user is None or self.password is None or self.database is None:
+                with SQLiteModel() as db:
+                    db.insertEmptyConnection(1)
+            self.mainView = ViewRegister.MAIN_VIEW.value()
+            self.viewHandler = ViewHandler(self.mainView, self, (self.getBooks(), self.getAllSubjectNames, True))
+            return
 
         # CallbackHandler
         # Load the main view, which enable the window
@@ -49,14 +85,14 @@ class Controller(unittest.TestCase):
         # Use self.viewHandler.initiateView() to set a new view and kill the old one
         # Set Main windows on startup
         self.mainView = ViewRegister.MAIN_VIEW.value()
-        self.viewHandler = ViewHandler(self.mainView, self, (self.getBooks(), self.getAllSubjectNames()))
+        self.viewHandler = ViewHandler(self.mainView, self, (self.getBooks(), self.getAllSubjectNames, False))
 
     """
     Loads every subject into it's own initiation of the Subject-Class
     """
 
     def loadSubjects(self):
-        with SQLiteModel() as db:
+        with MySQLModel(self.host, self.user, self.password, self.database) as db:
             for subjectID in db.getSubjectIDs():
                 Subject.Subject(
                     subjectID[0],
@@ -68,7 +104,7 @@ class Controller(unittest.TestCase):
     """
 
     def loadTitles(self):
-        with SQLiteModel() as db:
+        with MySQLModel(self.host, self.user, self.password, self.database) as db:
             for titleID in db.getTitleIDs():
                 Title.Title(
                     titleID[0],
@@ -83,7 +119,7 @@ class Controller(unittest.TestCase):
     """
 
     def loadStudents(self):
-        with SQLiteModel() as db:
+        with MySQLModel(self.host, self.user, self.password, self.database) as db:
             for studentID in db.getStudentIDs():
                 Student.Student(
                     studentID[0],
@@ -97,7 +133,7 @@ class Controller(unittest.TestCase):
     """
 
     def loadBooks(self):
-        with SQLiteModel() as db:
+        with MySQLModel(self.host, self.user, self.password, self.database) as db:
             for bookID in db.getBookIDs():
                 if db.isBookBorrowed(bookID[0]):
                     Book.Book(
@@ -162,9 +198,17 @@ class Controller(unittest.TestCase):
     """
 
     def handleCallback(self, callbackType: Callback, *values):
-        if callbackType == Callback.ADD_SUBJECT:
+        if callbackType == Callback.ADD_DB_CONNECTION:
             with SQLiteModel() as db:
-                subjectID = db.insertFachbereich(values[0].get())
+                try:
+                    db.updateConnection(1, values[0].get(), values[1].get(), values[2].get(), values[3].get())
+                except DatabaseError as error:
+                    print(error)
+            self.mainView.connectionwindow.after(100, self.mainView.connectionwindow.destroy)
+            Controller()
+        elif callbackType == Callback.ADD_SUBJECT:
+            with MySQLModel(self.host, self.user, self.password, self.database) as db:
+                subjectID = db.resolve(db.insertFachbereich, values[0].get())
                 Subject.Subject(int(subjectID[0]), values[0].get())
                 self.mainView.updateSubjects(self.getAllSubjectNames())
             values[0].delete(0, 'end')
@@ -174,18 +218,23 @@ class Controller(unittest.TestCase):
                 subject = Subject.getSubjectByName(values[0])
 
                 # Delete books and titles, which belong to this subject
-                for book in Book.books:
+                removedBooks = []
+                for i in range(0, len(Book.books)):
+                    book = Book.books[i]
                     if book.title.subject == subject:
-                        SQLiteModel().deleteRow("EXEMPLAR", "ExemplarID", book.id)
-                        Book.books.remove(book)
+                        with MySQLModel(self.host, self.user, self.password, self.database) as db:
+                            db.resolve(db.deleteRow, "EXEMPLAR", "ExemplarID", book.id)
+                        removedBooks.append(book)
+
+                [Book.books.remove(book) for book in removedBooks]
 
                 for title in Title.titles:
-                    if title.subject == subject:
-                        SQLiteModel().deleteRow("TITEL", "TitelID", title.id)
+                    if title.subject.id == subject.id:
+                        MySQLModel(self.host, self.user, self.password, self.database).deleteRow("TITEL", "TitelID", title.id)
                         Title.titles.remove(title)
 
-                with SQLiteModel() as db:
-                    db.deleteRow("FACHBEREICH", "FachbereichsID", subject.id)
+                with MySQLModel(self.host, self.user, self.password, self.database) as db:
+                    db.resolve(db.deleteRow, "FACHBEREICH", "FachbereichsID", subject.id)
                     Subject.subjects.remove(Subject.getSubjectByName(values[0]))
                     self.mainView.updateSubjects(self.getAllSubjectNames())
 
@@ -205,14 +254,14 @@ class Controller(unittest.TestCase):
             curItemID = values[0].focus()
             curItem = values[0].item(curItemID)
             bookID = curItem.get("text")
-            with SQLiteModel() as db:
+            with MySQLModel(self.host, self.user, self.password, self.database) as db:
                 db.generateQRCode(bookID)
 
         elif callbackType == Callback.BORROW_BOOK:
-            with SQLiteModel() as db:
+            with MySQLModel(self.host, self.user, self.password, self.database) as db:
                 student = Student.getStudentByAttributes(values[0], values[1], values[2])
                 if student is None:
-                    studentID = db.insertSchueler(values[0], values[1], values[2])[0]
+                    studentID = db.resolve(db.insertSchueler, values[0], values[1], values[2])[0]
                     student = Student.Student(studentID, values[0], values[1], values[2])
 
                 curItemID = values[3].focus()
@@ -223,7 +272,8 @@ class Controller(unittest.TestCase):
                 book.student = student
                 book.borrowed = True
 
-                db.insertAusleihe(
+                db.resolve(
+                    db.insertAusleihe,
                     student.id,
                     bookID,
                     datetime.date.today()
@@ -238,21 +288,24 @@ class Controller(unittest.TestCase):
                 command=lambda: self.mainView.control.handleCallback(Callback.RETURN_BOOK, self.mainView.trv)
             )
 
-            self.mainView.editwindow.after(100, self.mainView.editwindow.destroy)
+            self.mainView.leasingwindow.after(100, self.mainView.leasingwindow.destroy)
+            self.mainView.trigger1 = False
 
             curItemID = values[3].focus()
             curItem = values[3].item(curItemID)
             isBorrowed = curItem.get("values")
-            self.mainView.reloadLeasingReturnButton(isBorrowed)
+
+            # self.mainView.reloadLeasingReturnButton(isBorrowed)
 
             self.reloadTable()
 
         elif callbackType == Callback.RETURN_BOOK:
-            with SQLiteModel() as db:
+            with MySQLModel(self.host, self.user, self.password, self.database) as db:
                 curItemID = values[0].focus()
                 curItem = values[0].item(curItemID)
                 nValues = curItem.get("values")
-                studentName = nValues[4].split(" ")[0]
+                try: studentName = nValues[4].split(" ")[0]
+                except IndexError: return
                 studentSurname = nValues[4].split(" ")[1]
 
                 student = Student.getStudentByAttributes(studentName, studentSurname)
@@ -266,7 +319,7 @@ class Controller(unittest.TestCase):
                 book = Book.getBook(bookID)
 
                 borrowID = db.getAusleiheID(student.id, bookID)[0]
-                db.deleteRow("AUSLEIHE", "VorgangsID", borrowID)
+                db.resolve(db.deleteRow, "AUSLEIHE", "VorgangsID", borrowID)
 
                 book.student = None
                 book.borrowed = False
@@ -284,7 +337,8 @@ class Controller(unittest.TestCase):
 
         elif callbackType == Callback.SEARCH:
             content = values[0].get()
-            if content == "Suchen": return
+            if content == "Suchen":
+                return
 
             matchedBooks = []
 
@@ -305,8 +359,7 @@ class Controller(unittest.TestCase):
                         if 1000 < int(content):
                             if content in book.title.title or content in book.student.surname or \
                                     content in book.student.name or content in book.student.schoolClass or \
-                                    content in book.title.author or content in book.title.isbn or int(
-                                content) == book.id:
+                                    content in book.title.author or content in book.title.isbn or int(content) == book.id:
                                 matchedBooks.append(book)
                         else:
                             if int(content) == book.id:
@@ -336,13 +389,14 @@ class Controller(unittest.TestCase):
                 return
 
             books = []
-            with SQLiteModel() as db:
-                titleID = db.insertTitel(subject.id, titleName, author, isbn)[0]
+            with MySQLModel(self.host, self.user, self.password, self.database) as db:
+                titleID = db.resolve(db.insertTitel, subject.id, titleName, author, isbn)[0]
                 title = Title.Title(titleID, titleName, isbn, author, subject)
 
                 # Create all the books, given in amount
                 for bookIndex in range(0, amount):
-                    bookID = db.insertExemplar(titleID, str(bookIndex))[-1][0]
+                    note = (str(bookIndex) + str(title.id))
+                    bookID = db.resolve(db.insertExemplar, titleID, "")[-1][0]
                     Book.Book(bookID, False, title)
 
             self.reloadTable()
@@ -355,7 +409,8 @@ class Controller(unittest.TestCase):
         elif callbackType == Callback.TITLE_EDIT_INIT:
             curItemID = values[0].focus()
             curItem = values[0].item(curItemID)
-            bookID = int(curItem.get("text"))
+            try: bookID = int(curItem.get("text"))
+            except: return
 
             # Get the amount of all books with the same title
             book = Book.getBook(bookID)
@@ -371,8 +426,8 @@ class Controller(unittest.TestCase):
             except:
                 return
 
-            with SQLiteModel() as db:
-                db.deleteRow("EXEMPLAR", "ExemplarID", bookID)
+            with MySQLModel(self.host, self.user, self.password, self.database) as db:
+                db.resolve(db.deleteRow, "EXEMPLAR", "ExemplarID", bookID)
                 Book.books.remove(Book.getBook(bookID))
 
             self.reloadTable()
@@ -384,7 +439,8 @@ class Controller(unittest.TestCase):
                 newIndex = (int(curItemID) + 1)
 
             if not Book.getBook(newIndex) is None:
-                values[0].selection_set(newIndex)
+                try: values[0].selection_set(newIndex)
+                except: return
                 values[0].focus(newIndex)
 
         elif callbackType == Callback.TITLE_EDIT:
@@ -407,11 +463,11 @@ class Controller(unittest.TestCase):
             else:
                 return
 
-            with SQLiteModel() as db:
+            with MySQLModel(self.host, self.user, self.password, self.database) as db:
                 oldTitle = Title.getTitleByNameAndISBN(titleNameBefore, isbnBefore)
 
                 # Update database
-                db.updateTitle(oldTitle.id, titleName, isbn, author, subject.id)
+                db.resolve(db.updateTitle, oldTitle.id, titleName, isbn, author, subject.id)
 
                 # Update title instances
                 oldTitle.title = titleName
@@ -439,17 +495,17 @@ class Controller(unittest.TestCase):
                         # bookID = db.insertExemplar(oldTitle.id, str(newBookNumber))[-1]
                         # Book.Book(bookID, False, oldTitle)
                         if not bookPrio1 == []:
-                            db.deleteRow("EXEMPLAR", "ExemplarID", bookPrio1[-1].id)
+                            db.resolve(db.deleteRow, "EXEMPLAR", "ExemplarID", bookPrio1[-1].id)
                             Book.books.remove(bookPrio1[-1])
                             bookPrio1.remove(bookPrio1[-1])
                         else:
-                            db.deleteRow("EXEMPLAR", "ExemplarID", bookPrio2[-1].id)
+                            db.resolve(db.deleteRow, "EXEMPLAR", "ExemplarID", bookPrio2[-1].id)
                             Book.books.remove(bookPrio2[-1])
                             bookPrio2.remove(bookPrio2[-1])
 
                 if currentAmount < amount:
                     for newBookNumber in range(0, (amount - currentAmount)):
-                        bookID = db.insertExemplar(oldTitle.id, str(newBookNumber))[-1][0]
+                        bookID = db.resolve(db.insertExemplar, oldTitle.id, "")[-1][0]
                         Book.Book(bookID, False, oldTitle)
 
             self.reloadTable()
@@ -458,7 +514,7 @@ class Controller(unittest.TestCase):
             self.mainView.trigger1 = False
 
     def createTestDatabaseInput(self):
-        with SQLiteModel() as db:
+        with MySQLModel(self.host, self.user, self.password, self.database) as db:
             db.insertSchueler("Yassin", "Starzetz", "10.11")
             db.insertSchueler("Luis", "Hamann", "10.11")
             db.insertSchueler("Leon", "Martin", "10.11")

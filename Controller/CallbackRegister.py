@@ -19,4 +19,5 @@ class Callback(Enum):
     TITLE_CREATE = 8,
     TITLE_EDIT_INIT = 9,
     BOOK_DELETE = 10,
-    TITLE_EDIT = 11
+    TITLE_EDIT = 11,
+    ADD_DB_CONNECTION = 12
