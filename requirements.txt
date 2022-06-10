@@ -19,3 +19,4 @@ six==1.16.0
 wheel==0.37.1
 keyboard~=0.13.5
 Pillow~=9.1.1
+mysql-connector-python~=8.0.29
