@@ -427,6 +427,7 @@ class MainView(View, customtkinter.CTk):
         try:
             windowtitle = (curDict[0] + " ausleihen")
         except:
+            self.trigger1 = False
             return
         self.leasingwindow.title(windowtitle)
         self.leasingwindow.geometry('780x320')
