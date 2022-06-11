@@ -316,6 +316,8 @@ class MainView(View, customtkinter.CTk):
             self.slider_button_2.configure(image=editicon)
             self.checkbox_button_1.configure(image=QRIcon)
 
+        self.state("zoomed")
+
     def start(self):
         self.mainloop()
 
@@ -427,6 +429,7 @@ class MainView(View, customtkinter.CTk):
         try:
             windowtitle = (curDict[0] + " ausleihen")
         except:
+            self.trigger1 = False
             return
         self.leasingwindow.title(windowtitle)
         self.leasingwindow.geometry('780x320')
