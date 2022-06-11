@@ -1,15 +1,8 @@
 import sys
-from functools import partial
-from tkinter.ttk import *
-from email.mime import image
 import tkinter
 import tkinter.messagebox
-from turtle import width
-from webbrowser import BackgroundBrowser
 import customtkinter
 from tkinter import PhotoImage, ttk
-import os
-import asyncio
 from Controller import Controller
 from Controller.CallbackRegister import Callback
 
