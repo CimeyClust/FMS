@@ -316,6 +316,8 @@ class MainView(View, customtkinter.CTk):
             self.slider_button_2.configure(image=editicon)
             self.checkbox_button_1.configure(image=QRIcon)
 
+        self.state("zoomed")
+
     def start(self):
         self.mainloop()
 
