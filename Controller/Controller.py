@@ -207,6 +207,10 @@ class Controller:
             self.mainView.connectionwindow.after(100, self.mainView.connectionwindow.destroy)
             Controller()
         elif callbackType == Callback.ADD_SUBJECT:
+            # Validate entry
+            if len(values[0].get()) == 0:
+                values[0].config(highlightthickness=2, highlightbackground="red", highlightcolor="red")
+                return
             with MySQLModel(self.host, self.user, self.password, self.database) as db:
                 subjectID = db.resolve(db.insertFachbereich, values[0].get())
                 Subject.Subject(int(subjectID[0]), values[0].get())
