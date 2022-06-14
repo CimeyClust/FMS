@@ -12,7 +12,6 @@ import traceback
 
 from mysql.connector import DatabaseError
 
-from View import Views
 from Controller.CallbackRegister import Callback
 from Controller.ViewHandler import ViewHandler
 from Controller.ViewRegister import ViewRegister
@@ -207,6 +206,10 @@ class Controller:
             self.mainView.connectionwindow.after(100, self.mainView.connectionwindow.destroy)
             Controller()
         elif callbackType == Callback.ADD_SUBJECT:
+            # Validate entry
+            if len(values[0].get()) == 0:
+                values[0].config(highlightthickness=2, highlightbackground="red", highlightcolor="red")
+                return
             with MySQLModel(self.host, self.user, self.password, self.database) as db:
                 subjectID = db.resolve(db.insertFachbereich, values[0].get())
                 Subject.Subject(int(subjectID[0]), values[0].get())
@@ -243,12 +246,7 @@ class Controller:
                 pass
 
         elif callbackType == Callback.RELOAD_TABLE:
-            if values[0] == "all":
-                self.mainView.reloadTable(self.getBooks())
-            elif values[0] == "available":
-                self.mainView.reloadTable(self.getBooks(False))
-            elif values[0] == "unavailable":
-                self.mainView.reloadTable(self.getBooks(True))
+            self.reloadTable()
 
         elif callbackType == Callback.CREATE_QRCODE:
             curItemID = values[0].focus()

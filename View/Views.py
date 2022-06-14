@@ -149,15 +149,15 @@ class MainView(View, customtkinter.CTk):
         ttk.Style().map("Treeview.Heading", background=[('pressed', '!focus', "#1e1e1f"), ('active', "#2d2e2e"),
                                                         ('disabled', "#383838")])
         style.configure("Treeview.Heading", background="#383838", foreground="white")
-        style.configure("Treeview", background="#383838", fieldbackground="#383838", foreground="#383838")
+        style.configure("Treeview", background="#383838", fieldbackground="#383838", foreground="#383838", rowheight=30)
         self.trv.grid(column=0, row=0, sticky="nwe", padx=15, pady=15)
-        self.trv.column("#0", anchor="center", stretch="yes", width=0)
-        self.trv.column("#1", anchor="center", stretch="yes", width=1)
-        self.trv.column("#2", anchor="center", stretch="yes", width=1)
-        self.trv.column("#3", anchor="center", stretch="yes", width=1)
-        self.trv.column("#4", anchor="center", stretch="yes", width=1)
-        self.trv.column("#5", anchor="center", stretch="yes", width=1)
-        self.trv.column("#6", anchor="center", stretch="yes", width=1)
+        self.trv.column("#0", anchor="center", stretch=True, width=0)
+        self.trv.column("#1", anchor="center", stretch=True, width=1)
+        self.trv.column("#2", anchor="center", stretch=True, width=1)
+        self.trv.column("#3", anchor="center", stretch=True, width=1)
+        self.trv.column("#4", anchor="center", stretch=True, width=1)
+        self.trv.column("#5", anchor="center", stretch=True, width=1)
+        self.trv.column("#6", anchor="center", stretch=True, width=1)
 
         self.trv.heading("#0", text="Buch-ID")
         self.trv.heading("#1", text="Titel")
@@ -180,8 +180,8 @@ class MainView(View, customtkinter.CTk):
             self.trv.insert(parent='', index='end', iid=index, text=book.id,
                             values=(
                                 book.title.title, book.title.isbn, book.title.author, book.title.subject.subjectTitle,
-                                student, group))
-            # command=partial(control.handleCallback, (Callback.ADD_BOOKS_BUTTON, book.id))
+                                student, group), tags=('colored',))
+
 
         self.trv.bind('<<TreeviewSelect>>', self.activate)
         self.trv.bind("<Double-1>", lambda x: self.control.handleCallback(Callback.TITLE_EDIT_INIT, self.trv))
@@ -358,10 +358,9 @@ class MainView(View, customtkinter.CTk):
                                                                                            padx=5, sticky="w")
             self.selected_subject = tkinter.StringVar()
             self.subject_cb = ttk.Combobox(master=self.frame_input, textvariable=self.selected_subject)
-            self.subject_cb.grid(row=0, column=4, columnspan=3, pady=20, padx=20, sticky="nesw")
+            self.subject_cb.grid(row=0, column=4, columnspan=3, pady=35, padx=30, sticky="nesw")
             self.subject_cb['state'] = 'readonly'
             self.subject_cb['values'] = subjects
-            # self.subject_cb['values'] = [book.title.author for book, index in zip(values, range(0, len(values)-1))]
 
             self.title = customtkinter.CTkLabel(master=self.frame_input, anchor=tkinter.W, justify=tkinter.LEFT,
                                                 text="Titel:", text_font='Arial 13').grid(row=1, column=0, columnspan=1,
@@ -501,7 +500,7 @@ class MainView(View, customtkinter.CTk):
                                                                                        pady=20, padx=5, sticky="w")
         self.selected_subject = tkinter.StringVar()
         self.subject_cb2 = ttk.Combobox(master=self.frame_input, textvariable=self.selected_subject)
-        self.subject_cb2.grid(row=1, column=1, columnspan=10, pady=20, padx=20, sticky="nesw")
+        self.subject_cb2.grid(row=1, column=1, columnspan=10, pady=35, padx=30, sticky="nesw")
         self.subject_cb2['state'] = 'readonly'
         self.subject_cb2['values'] = self.values[1]()
         try:
@@ -584,7 +583,7 @@ class MainView(View, customtkinter.CTk):
                                                                                               padx=10, sticky="w")
         self.selected_subject1 = tkinter.StringVar()
         self.subject_cb1 = ttk.Combobox(master=self.frame_input1, textvariable=self.selected_subject1)
-        self.subject_cb1.grid(row=3, column=0, columnspan=3, pady=(10, 20), padx=(30, 10), sticky="nesw")
+        self.subject_cb1.grid(row=3, column=0, columnspan=3, pady=(20, 20), padx=(30, 20), sticky="nesw")
         self.subject_cb1['state'] = 'readonly'
         self.subject_cb1['values'] = self.values[1]()
         try:
