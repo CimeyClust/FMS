@@ -12,7 +12,6 @@ import traceback
 
 from mysql.connector import DatabaseError
 
-from View import Views
 from Controller.CallbackRegister import Callback
 from Controller.ViewHandler import ViewHandler
 from Controller.ViewRegister import ViewRegister
@@ -247,12 +246,7 @@ class Controller:
                 pass
 
         elif callbackType == Callback.RELOAD_TABLE:
-            if values[0] == "all":
-                self.mainView.reloadTable(self.getBooks())
-            elif values[0] == "available":
-                self.mainView.reloadTable(self.getBooks(False))
-            elif values[0] == "unavailable":
-                self.mainView.reloadTable(self.getBooks(True))
+            self.reloadTable()
 
         elif callbackType == Callback.CREATE_QRCODE:
             curItemID = values[0].focus()
