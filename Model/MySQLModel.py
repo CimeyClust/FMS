@@ -1,7 +1,7 @@
 ###########################################################################
 #
 # MySQLModel.py
-# Program made by Luis, Leon and Yassin for the FMS project.
+# Program made by Leon and Yassin for the FMS project.
 #
 ###########################################################################
 
