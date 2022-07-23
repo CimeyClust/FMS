@@ -1,13 +1,14 @@
 students = []
 
 class Student:
-    def __init__(self, id: int, name: str, surname: str, schoolClass: str):
+    def __init__(self, id: int, name: str, surname: str, schoolClass: str, temporary: bool = False):
         self.id = id
         self.name = name
         self.surname = surname
         self.schoolClass = schoolClass
 
-        students.append(self)
+        if not temporary:
+            students.append(self)
 
 
 def getStudent(id: int):

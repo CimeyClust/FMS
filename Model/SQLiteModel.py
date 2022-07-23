@@ -63,7 +63,6 @@ class SQLiteModel(object):
                              ConnectionID INTEGER PRIMARY KEY,
                              Host VARCHAR(255) NOT NULL,
                              User VARCHAR(255) NOT NULL,
-                             Password VARCHAR(255) NOT NULL,
                              Database VARCHAR(255) NOT NULL
                          ); """
         self.cursor.execute(table_connection)
@@ -91,37 +90,6 @@ class SQLiteModel(object):
         self.connection.close()
         # print("\nClosed connection to the database...")
 
-    #######################################################################
-    #
-    #  Function to generate a QR-Code as image out of a number.
-    #
-    #  This function is used to convert the book id into a qr-code
-    #  and save it locally as image
-    #
-    #  @param id: A number that represents a Book ID
-    #
-    #######################################################################
-
-    def generateQRCode(self, id: int):
-        qr = qrcode.QRCode(
-            version=1,
-            error_correction=qrcode.constants.ERROR_CORRECT_L,
-            box_size=10,
-            border=4,
-        )
-        qr.add_data(id)
-        qr.make(fit=True)
-
-        path = tkinter.filedialog.askdirectory(initialdir=os.path.expanduser("~"))
-
-        img = qr.make_image(fill_color="black", back_color="white")
-        # img.save(os.getcwd() + "\\Book" + str(id) + ".png")
-        try:
-            os.mkdir(path + "\\Books")
-        except OSError:
-            pass
-        img.save(path + "\\Books\\Book" + str(id) + ".png")
-
     def getConnectionHost(self, id: int):
         self.cursor.execute(f"SELECT Host FROM `CONNECTION` WHERE ConnectionID = {id}")
         return self.cursor.fetchone()
@@ -130,18 +98,15 @@ class SQLiteModel(object):
         self.cursor.execute(f"SELECT User FROM `CONNECTION` WHERE ConnectionID = {id}")
         return self.cursor.fetchone()
 
-    def getConnectionPassword(self, id: int):
-        self.cursor.execute(f"SELECT Password FROM `CONNECTION` WHERE ConnectionID = {id}")
-        return self.cursor.fetchone()
-
     def getConnectionDatabase(self, id: int):
         self.cursor.execute(f"SELECT Database FROM `CONNECTION` WHERE ConnectionID = {id}")
         return self.cursor.fetchone()
 
-    def updateConnection(self, id: int, host: str, user: str, password: str, database: str):
-        statement = f"UPDATE CONNECTION SET Host = '{host}', User = '{user}', Password = '{password}', Database = '{database}' WHERE ConnectionID = {id};"
+    def updateConnection(self, id: int, host: str, user: str, database: str):
+        statement = f"UPDATE CONNECTION SET Host = '{host}', User = '{user}', Database = '{database}' WHERE ConnectionID = {id};"
         self.cursor.execute(statement)
 
     def insertEmptyConnection(self, id):
-        statement = f"INSERT INTO CONNECTION (ConnectionID, Host, User, Password, Database) VALUES({id}, '', '', '', '');"
+        statement = f"INSERT INTO CONNECTION (ConnectionID, Host, User, Password, Database) VALUES({id}, " \
+                    f"'', '', '', '');"
         self.cursor.execute(statement)
