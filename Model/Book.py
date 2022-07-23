@@ -3,15 +3,23 @@ from Model.Student import Student
 
 books = []
 
-
 class Book:
+    _highestBookID = float('-inf')
+
     def __init__(self, id: int, borrowed: bool, title: Title, student: Student = None):
         self.id = id
         self.borrowed = borrowed
         self.title = title
         self.student = student
 
+        if id > Book._highestBookID:
+            Book._highestBookID = id
+
         books.append(self)
+
+    @staticmethod
+    def getHighestBookID() -> float:
+        return Book._highestBookID
 
 
 def getBook(id: int) -> Book:

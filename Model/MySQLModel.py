@@ -61,6 +61,9 @@ class MySQLModel(object):
         self.cursor = self.connection.cursor()
         self.resolve(self.createTable)
 
+    def isConnected(self):
+        return self.connection.is_connected()
+
     #######################################################################
     #
     #  Function to create tables.

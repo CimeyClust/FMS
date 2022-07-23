@@ -66,8 +66,9 @@ class MainView(View, customtkinter.CTk):
         global editiconw
 
         self.control = control
-        if values[0][2]:
-            self.setupconnection()
+        if values[0][2][0]:
+            self.setupconnection(host=values[0][2][1], user=values[0][2][2], database=values[0][2][3])
+            return
 
         super().__init__()
 
@@ -82,15 +83,15 @@ class MainView(View, customtkinter.CTk):
         # self.minsize(App.WIDTH, App.HEIGHT)
         # Set icons
         self.iconbitmap(f"View\images\logo.ico")
-        Bild1 = PhotoImage(file=f"View\images\logo.png")
-        QRIcon = PhotoImage(file=f"View\images\qriconsmall.png")
-        editicon = PhotoImage(file=f"View\images\stifticon.png")
-        trashicon = PhotoImage(file=f"View\images\\trashicon.png")
-        plusicon = PhotoImage(file=f"View\images\plus.png")
-        QRIconw = PhotoImage(file=f"View\images\qriconsmallw.png")
-        editiconw = PhotoImage(file=f"View\images\stifticonw.png")
-        trashiconw = PhotoImage(file=f"View\images\\trashiconw.png")
-        plusiconw = PhotoImage(file=f"View\images\plusw.png")
+        Bild1 = PhotoImage(master=self, file=f"View\images\logo.png")
+        QRIcon = PhotoImage(master=self, file=f"View\images\qriconsmall.png")
+        editicon = PhotoImage(master=self, file=f"View\images\stifticon.png")
+        trashicon = PhotoImage(master=self, file=f"View\images\\trashicon.png")
+        plusicon = PhotoImage(master=self, file=f"View\images\plus.png")
+        QRIconw = PhotoImage(master=self, file=f"View\images\qriconsmallw.png")
+        editiconw = PhotoImage(master=self, file=f"View\images\stifticonw.png")
+        trashiconw = PhotoImage(master=self, file=f"View\images\\trashiconw.png")
+        plusiconw = PhotoImage(master=self, file=f"View\images\plusw.png")
         # QRIcon=PhotoImage(file="images/qriconsmall.png")
         # self.protocol("WM_DELETE_WINDOW", self.on_closing)  # call .on_closing() when app gets closed
 
@@ -651,9 +652,15 @@ class MainView(View, customtkinter.CTk):
                                             command=self.killProgram).grid(row=7, column=1, columnspan=1, pady=10,
                                                                           padx=20, sticky="nesw")
 
-        self.hostentry.insert(0, host)
-        self.userentry.insert(0, user)
-        self.databaseentry.insert(0, database)
+        if host != "":
+            self.hostentry.insert(0, host)
+
+        if user != "":
+            self.userentry.insert(0, user)
+
+        if database != "":
+            self.databaseentry.insert(0, database)
+
         self.connectionwindow.protocol("WM_DELETE_WINDOW", self.killProgram)
         self.connectionwindow.mainloop()
 

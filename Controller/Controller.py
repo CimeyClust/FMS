@@ -9,6 +9,7 @@ import datetime
 import sys
 import tkinter
 import traceback
+import threading
 
 from mysql.connector import DatabaseError
 
@@ -23,7 +24,7 @@ import unittest
 
 
 class Controller:
-    def __init__(self, args=None):
+    def __init__(self, password=None, args=None):
         if args is None:
             args = []
 
@@ -39,52 +40,35 @@ class Controller:
 
         # Load access data for the Remote Database
         with SQLiteModel() as db:
-            self.host = db.getConnectionHost(1)
-            self.user = db.getConnectionUser(1)
-            self.password = db.getConnectionPassword(1)
-            self.database = db.getConnectionDatabase(1)
+            self.host = db.getConnectionHost(1)[0] or ""
+            self.user = db.getConnectionUser(1)[0] or ""
+            self.database = db.getConnectionDatabase(1)[0] or ""
+            self.password = password or ""
+            print(f"Host: {self.host} + User: {self.user} + Database: {self.database} + Password: {self.password}")
 
-        if self.host is None or self.user is None or self.password is None or self.database is None:
-            with SQLiteModel() as db:
-                db.insertEmptyConnection(1)
-            self.mainView = ViewRegister.MAIN_VIEW.value()
-            self.viewHandler = ViewHandler(self.mainView, self, (self.getBooks(), self.getAllSubjectNames, True))
-            return
+        self.mainView = ViewRegister.MAIN_VIEW.value()
+        print("Test")
+        threading.Thread(target=self.reloadData, name="Reloader").start()
 
-        self.host = self.host[0]
-        self.user = self.user[0]
-        self.password = self.password[0]
-        self.database = self.database[0]
+        try:
+            with MySQLModel(self.host, self.user, self.password, self.database) as db:
+                if len(args) >= 1 and "testing" in args:
+                    return
+                self.viewHandler = ViewHandler(self.mainView, self, (self.getBooks(), self.getAllSubjectNames, (False, )))
+        except DatabaseError as error:
+            print(traceback.format_exc())
+            self.viewHandler = ViewHandler(self.mainView, self, (self.getBooks(), self.getAllSubjectNames, (True, self.host, self.user, self.database)))
 
-        # Load data
+    def reloadData(self):
         try:
             self.loadSubjects()
             self.loadTitles()
             self.loadStudents()
             self.loadBooks()
+            # self.reloadTable()
         except DatabaseError as error:
             print(traceback.format_exc())
-            if self.host is None or self.user is None or self.password is None or self.database is None:
-                with SQLiteModel() as db:
-                    db.insertEmptyConnection(1)
-            self.mainView = ViewRegister.MAIN_VIEW.value()
-            self.viewHandler = ViewHandler(self.mainView, self, (self.getBooks(), self.getAllSubjectNames, True))
             return
-
-        # CallbackHandler
-        # Load the main view, which enable the window
-        # A new view will be instantiated every time it switches
-
-        # Use self.callbackHandler.initiateView() to set a new view and kill the old one
-
-        # Cancel the init of the view, when the code gets tested:
-        if len(args) >= 1 and "testing" in args:
-            return
-
-        # Use self.viewHandler.initiateView() to set a new view and kill the old one
-        # Set Main windows on startup
-        self.mainView = ViewRegister.MAIN_VIEW.value()
-        self.viewHandler = ViewHandler(self.mainView, self, (self.getBooks(), self.getAllSubjectNames, False))
 
     """
     Loads every subject into it's own initiation of the Subject-Class
@@ -200,11 +184,12 @@ class Controller:
         if callbackType == Callback.ADD_DB_CONNECTION:
             with SQLiteModel() as db:
                 try:
-                    db.updateConnection(1, values[0].get(), values[1].get(), values[2].get(), values[3].get())
+                    db.updateConnection(1, values[0].get(), values[1].get(), values[3].get())
+                    password = values[2].get()
                 except DatabaseError as error:
                     print(error)
             self.mainView.connectionwindow.after(100, self.mainView.connectionwindow.destroy)
-            Controller()
+            Controller(password=password)
         elif callbackType == Callback.ADD_SUBJECT:
             # Validate entry
             if len(values[0].get()) == 0:
@@ -343,18 +328,19 @@ class Controller:
             for book in Book.books:
                 if book.student is None:
                     if content.isnumeric():
-                        if 1000 < int(content):
-                            if content in book.title.title or content in book.title.author or content in book.title.isbn \
-                                    or int(content) == book.id:
+                        if Book.Book.getHighestBookID() < int(content):
+                            if content in book.title.title or content in book.title.author \
+                                    or content in book.title.isbn or int(content) == book.id:
                                 matchedBooks.append(book)
                         elif int(content) == book.id:
                             matchedBooks.append(book)
                     else:
-                        if content in book.title.title or content in book.title.author or content in book.title.isbn:
+                        if content in book.title.title or content in book.title.author or \
+                                content in book.title.isbn or content in book.title.subject.subjectTitle:
                             matchedBooks.append(book)
                 else:
                     if content.isnumeric():
-                        if 1000 < int(content):
+                        if Book.Book.getHighestBookID() < int(content):
                             if content in book.title.title or content in book.student.surname or \
                                     content in book.student.name or content in book.student.schoolClass or \
                                     content in book.title.author or content in book.title.isbn or int(content) == book.id:
@@ -365,7 +351,8 @@ class Controller:
                     else:
                         if content in book.title.title or content in book.student.surname or \
                                 content in book.student.name or content in book.student.schoolClass or \
-                                content in book.title.author or content in book.title.isbn:
+                                content in book.title.author or content in book.title.isbn or \
+                                content in book.title.subject.subjectTitle:
                             matchedBooks.append(book)
 
             self.mainView.reloadTable(matchedBooks)
