@@ -2,11 +2,12 @@ subjects = []
 
 
 class Subject:
-    def __init__(self, id: int, subjectTitle: str):
+    def __init__(self, id: int, subjectTitle: str, temporary: bool = False):
         self.id = id
         self.subjectTitle = subjectTitle
 
-        subjects.append(self)
+        if not temporary:
+            subjects.append(self)
 
 
 def getSubject(id: int):

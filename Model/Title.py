@@ -4,14 +4,15 @@ titles = []
 
 
 class Title:
-    def __init__(self, id: int, title: str, isbn: str, author: str, subject: Subject):
+    def __init__(self, id: int, title: str, isbn: str, author: str, subject: Subject, temporary: bool = False):
         self.id = id
         self.title = title
         self.isbn = isbn
         self.author = author
         self.subject = subject
 
-        titles.append(self)
+        if not temporary:
+            titles.append(self)
 
 
 def getTitle(id: int):
@@ -19,6 +20,7 @@ def getTitle(id: int):
         if title.id == id:
             return title
     return None
+
 
 def getTitleByNameAndISBN(name: str, isbn: str):
     for title in titles:

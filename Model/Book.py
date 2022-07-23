@@ -6,7 +6,7 @@ books = []
 class Book:
     _highestBookID = float('-inf')
 
-    def __init__(self, id: int, borrowed: bool, title: Title, student: Student = None):
+    def __init__(self, id: int, borrowed: bool, title: Title, student: Student = None, temporary: bool = False):
         self.id = id
         self.borrowed = borrowed
         self.title = title
@@ -15,7 +15,8 @@ class Book:
         if id > Book._highestBookID:
             Book._highestBookID = id
 
-        books.append(self)
+        if not temporary:
+            books.append(self)
 
     @staticmethod
     def getHighestBookID() -> float:

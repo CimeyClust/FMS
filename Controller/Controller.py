@@ -7,6 +7,7 @@
 import asyncio
 import datetime
 import sys
+import time
 import tkinter
 import traceback
 import threading
@@ -24,13 +25,12 @@ import unittest
 
 
 class Controller:
+
     def __init__(self, password=None, args=None):
+        self.exitRuntime = False
+
         if args is None:
             args = []
-
-        # Creates an async event loop for receiving database data
-        # self.mainLoop = asyncio.new_event_loop()
-
 
         # Create test database input at beginning
         # self.createTestDatabaseInput()
@@ -44,11 +44,10 @@ class Controller:
             self.user = db.getConnectionUser(1)[0] or ""
             self.database = db.getConnectionDatabase(1)[0] or ""
             self.password = password or ""
-            print(f"Host: {self.host} + User: {self.user} + Database: {self.database} + Password: {self.password}")
 
         self.mainView = ViewRegister.MAIN_VIEW.value()
-        print("Test")
-        threading.Thread(target=self.reloadData, name="Reloader").start()
+
+        self.reloader = threading.Thread(target=self.reloadData, name="Reloader").start()
 
         try:
             with MySQLModel(self.host, self.user, self.password, self.database) as db:
@@ -56,18 +55,22 @@ class Controller:
                     return
                 self.viewHandler = ViewHandler(self.mainView, self, (self.getBooks(), self.getAllSubjectNames, (False, )))
         except DatabaseError as error:
-            print(traceback.format_exc())
             self.viewHandler = ViewHandler(self.mainView, self, (self.getBooks(), self.getAllSubjectNames, (True, self.host, self.user, self.database)))
 
     def reloadData(self):
         try:
-            self.loadSubjects()
-            self.loadTitles()
-            self.loadStudents()
-            self.loadBooks()
-            # self.reloadTable()
+            tempSubjects = self.loadSubjects()
+            Subject.subjects = tempSubjects
+            tempTitles = self.loadTitles()
+            Title.titles = tempTitles
+            tempStudents = self.loadStudents()
+            Student.students = tempStudents
+            tempBooks = self.loadBooks()
+            Book.books = tempBooks
+
+            if not self.exitRuntime:
+                self.reloadData()
         except DatabaseError as error:
-            print(traceback.format_exc())
             return
 
     """
@@ -76,11 +79,14 @@ class Controller:
 
     def loadSubjects(self):
         with MySQLModel(self.host, self.user, self.password, self.database) as db:
+            tempSubjects = []
             for subjectID in db.getSubjectIDs():
-                Subject.Subject(
+                tempSubjects.append(Subject.Subject(
                     subjectID[0],
-                    db.getSubjectName(subjectID[0])[0]
-                )
+                    db.getSubjectName(subjectID[0])[0],
+                    temporary=True
+                ))
+        return tempSubjects
 
     """
     Loads every title into it's own initiation of the Title-Class
@@ -88,14 +94,17 @@ class Controller:
 
     def loadTitles(self):
         with MySQLModel(self.host, self.user, self.password, self.database) as db:
+            tempTitles = []
             for titleID in db.getTitleIDs():
-                Title.Title(
+                tempTitles.append(Title.Title(
                     titleID[0],
                     db.getTitleTitle(titleID[0])[0],
                     db.getTitleISBN(titleID[0])[0],
                     db.getTitleAuthor(titleID[0])[0],
-                    Subject.getSubject(db.getTitleSubjectID(titleID[0])[0])
-                )
+                    Subject.getSubject(db.getTitleSubjectID(titleID[0])[0]),
+                    temporary=True
+                ))
+        return tempTitles
 
     """
     Loads every student into it's own initiation of the Student-Class
@@ -103,13 +112,16 @@ class Controller:
 
     def loadStudents(self):
         with MySQLModel(self.host, self.user, self.password, self.database) as db:
+            tempStudents = []
             for studentID in db.getStudentIDs():
-                Student.Student(
+                tempStudents.append(Student.Student(
                     studentID[0],
                     db.getStudentSurName(studentID[0])[0],
                     db.getStudentLastName(studentID[0])[0],
-                    db.getStudentSchoolClass(studentID[0])[0]
-                )
+                    db.getStudentSchoolClass(studentID[0])[0],
+                    temporary=True
+                ))
+        return tempStudents
 
     """
     Loads every book into it's own initiation of the Book-Class
@@ -117,20 +129,24 @@ class Controller:
 
     def loadBooks(self):
         with MySQLModel(self.host, self.user, self.password, self.database) as db:
+            tempBooks = []
             for bookID in db.getBookIDs():
                 if db.isBookBorrowed(bookID[0]):
-                    Book.Book(
+                    tempBooks.append(Book.Book(
                         bookID[0],
                         db.isBookBorrowed(bookID[0]),
                         Title.getTitle(db.getBookTitleID(bookID[0])[0]),
-                        Student.getStudent(db.getBookStudentID(bookID[0])[0])
-                    )
+                        Student.getStudent(db.getBookStudentID(bookID[0])[0]),
+                        temporary=True
+                    ))
                 else:
-                    Book.Book(
+                    tempBooks.append(Book.Book(
                         bookID[0],
                         db.isBookBorrowed(bookID[0]),
                         Title.getTitle(db.getBookTitleID(bookID[0])[0]),
-                    )
+                        temporary=True
+                    ))
+        return tempBooks
 
     """
     Just return no borrowed books onlyBorrowed = false
@@ -175,6 +191,8 @@ class Controller:
             self.mainView.reloadTable(self.getBooks(False))
         elif self.mainView.radio_var.get() == 2:
             self.mainView.reloadTable(self.getBooks(True))
+        if not self.exitRuntime:
+            self.mainView.after(10000, self.reloadTable)
 
     """
     Handles the callbacks of the view
@@ -187,7 +205,7 @@ class Controller:
                     db.updateConnection(1, values[0].get(), values[1].get(), values[3].get())
                     password = values[2].get()
                 except DatabaseError as error:
-                    print(error)
+                    return
             self.mainView.connectionwindow.after(100, self.mainView.connectionwindow.destroy)
             Controller(password=password)
         elif callbackType == Callback.ADD_SUBJECT:

@@ -285,6 +285,7 @@ class MainView(View, customtkinter.CTk):
         # self.check_box_2.select()
 
         self.protocol("WM_DELETE_WINDOW", self.killProgram)
+        self.control.reloadTable()
         self.start()
 
     def change_mode(self):
@@ -701,6 +702,7 @@ class MainView(View, customtkinter.CTk):
 
 
     def killProgram(self, event=0):
+        self.control.exitRuntime = True
         sys.exit(0)
 
     def on_closing(self, event=0):
